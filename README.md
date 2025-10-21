@@ -28,3 +28,39 @@ git clone https://github.com/Alanhsiu/ADMN-RealWorld.git
 cd ADMN-RealWorld
 git checkout [your-branch-name]  # Switch to development branch
 ```
+
+## Contribution Guidelines
+
+#### 1. Create a new branch
+```bash
+git checkout main
+git pull origin main
+git checkout -b [your-branch-name]
+```
+
+#### 2. Make changes and commit
+```bash
+git add .
+git commit -m "[your-commit-message]"
+git push origin [your-branch-name]
+```
+
+#### 3. Open PR on GitHub
+- Go to repo → "Pull requests" → "New pull request"
+- Base: main, Compare: feature/your-task
+- Add title and description
+- Click "Create pull request"
+
+#### 4. Wait for Others' review
+- Wait for others to review your changes
+- If approved, merge your changes into main
+- If not approved, make changes and commit again
+
+#### 5. For Reviewers
+- Review PR on GitHub, and merge the changes into main
+```bash
+git checkout main
+git pull origin main
+git merge [branch-name]
+git push origin main
+```
