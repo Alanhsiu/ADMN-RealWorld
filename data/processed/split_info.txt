@@ -1,0 +1,7 @@
+Random seed: 42
+Split ratio - Train: 0.7, Val: 0.15, Test: 0.15000000000000005
+
+standing: {'total': 20, 'train': 14, 'val': 3, 'test': 3}
+left_hand: {'total': 20, 'train': 14, 'val': 3, 'test': 3}
+right_hand: {'total': 20, 'train': 14, 'val': 3, 'test': 3}
+both_hands: {'total': 20, 'train': 14, 'val': 3, 'test': 3}
