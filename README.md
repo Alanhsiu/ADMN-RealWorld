@@ -29,6 +29,15 @@ cd ADMN-RealWorld
 git checkout [your-branch-name]  # Switch to development branch
 ```
 
+### Environment Setup
+```bash
+python3 -m venv venv
+source venv/bin/activate
+which python
+pip install --upgrade pip
+pip install numpy scikit-learn opencv-python Pillow
+```
+
 ## Contribution Guidelines
 
 #### 1. Create a new branch
@@ -61,6 +70,7 @@ git push origin [your-branch-name]
 ```bash
 git checkout main
 git pull origin main
-git merge [branch-name]
-git push origin main
+git checkout [your-branch-name]
+git merge main
+git push origin [your-branch-name]
 ```
