@@ -1,1 +1,8 @@
 venv/
+
+checkpoints/*.pth
+checkpoints/pretrained/*.pth
+
+GTDM_Lowlight/__pycache__/
+GTDM_Lowlight/**/__pycache__/
+GTDM_Lowlight/**/*.pyc
