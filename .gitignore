@@ -1,8 +1,10 @@
 venv/
 
-checkpoints/*.pth
-checkpoints/pretrained/*.pth
+checkpoints/
 
 GTDM_Lowlight/__pycache__/
 GTDM_Lowlight/**/__pycache__/
 GTDM_Lowlight/**/*.pyc
+
+data/__pycache__/
+models/__pycache__/
