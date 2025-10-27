@@ -1,0 +1,1049 @@
+Using device: cuda
+
+Loading corrupted data from data...
+Loading corrupted dataset from data...
+Loaded 240 samples
+Train samples: 168
+Val samples: 36
+Test samples: 36
+
+Creating adaptive model...
+Loading Stage 1 weights from checkpoints/stage1/best_model.pth
+Loaded Stage 1 weights: _IncompatibleKeys(missing_keys=['qoi_perception.rgb_conv.0.weight', 'qoi_perception.rgb_conv.0.bias', 'qoi_perception.rgb_conv.2.weight', 'qoi_perception.rgb_conv.2.bias', 'qoi_perception.rgb_conv.4.weight', 'qoi_perception.rgb_conv.4.bias', 'qoi_perception.depth_conv.0.weight', 'qoi_perception.depth_conv.0.bias', 'qoi_perception.depth_conv.2.weight', 'qoi_perception.depth_conv.2.bias', 'qoi_perception.depth_conv.4.weight', 'qoi_perception.depth_conv.4.bias', 'qoi_perception.rgb_proj.weight', 'qoi_perception.rgb_proj.bias', 'qoi_perception.depth_proj.weight', 'qoi_perception.depth_proj.bias', 'layer_allocator.fusion.norm.weight', 'layer_allocator.fusion.norm.bias', 'layer_allocator.fusion.layers.0.0.norm.weight', 'layer_allocator.fusion.layers.0.0.norm.bias', 'layer_allocator.fusion.layers.0.0.to_qkv.weight', 'layer_allocator.fusion.layers.0.0.to_out.0.weight', 'layer_allocator.fusion.layers.0.0.to_out.0.bias', 'layer_allocator.fusion.layers.0.1.condln.weight', 'layer_allocator.fusion.layers.0.1.condln.bias', 'layer_allocator.fusion.layers.0.1.net.1.weight', 'layer_allocator.fusion.layers.0.1.net.1.bias', 'layer_allocator.fusion.layers.0.1.net.4.weight', 'layer_allocator.fusion.layers.0.1.net.4.bias', 'layer_allocator.fusion.layers.1.0.norm.weight', 'layer_allocator.fusion.layers.1.0.norm.bias', 'layer_allocator.fusion.layers.1.0.to_qkv.weight', 'layer_allocator.fusion.layers.1.0.to_out.0.weight', 'layer_allocator.fusion.layers.1.0.to_out.0.bias', 'layer_allocator.fusion.layers.1.1.condln.weight', 'layer_allocator.fusion.layers.1.1.condln.bias', 'layer_allocator.fusion.layers.1.1.net.1.weight', 'layer_allocator.fusion.layers.1.1.net.1.bias', 'layer_allocator.fusion.layers.1.1.net.4.weight', 'layer_allocator.fusion.layers.1.1.net.4.bias', 'layer_allocator.layer_mlp.weight', 'layer_allocator.layer_mlp.bias'], unexpected_keys=[])
+
+Freezing strategy:
+✅ Partial fine-tuning enabled
+  Frozen params: 114,587,136
+  Trainable params: 63,408,876
+Total parameters: 177,996,012
+Trainable parameters: 63,408,876
+
+Starting Stage 2 training for 100 epochs...
+============================================================
+
+Epoch 1/100:
+  Train - Loss: 2.6016 | Cls: 1.3586 | Alloc: 0.2486 | Acc: 41.07%
+  Val   - Loss: 1.5170 | Cls: 1.3861 | Alloc: 0.2618 | Acc: 38.89%
+  Temperature: 0.99
+  Avg Allocations:
+    clean          : RGB 6.1 | Depth 5.9
+    depth_occluded : RGB 5.5 | Depth 6.5
+    low_light      : RGB 5.8 | Depth 6.2
+  ✅ Saved best model (val_acc: 38.89%)
+============================================================
+
+Epoch 2/100:
+  Train - Loss: 2.4037 | Cls: 1.2450 | Alloc: 0.2317 | Acc: 41.07%
+  Val   - Loss: 1.4059 | Cls: 1.2752 | Alloc: 0.2615 | Acc: 44.44%
+  Temperature: 0.99
+  Avg Allocations:
+    clean          : RGB 6.5 | Depth 5.5
+    depth_occluded : RGB 6.2 | Depth 5.8
+    low_light      : RGB 5.9 | Depth 6.1
+  ✅ Saved best model (val_acc: 44.44%)
+============================================================
+
+Epoch 3/100:
+  Train - Loss: 2.3122 | Cls: 1.2247 | Alloc: 0.2175 | Acc: 42.86%
+  Val   - Loss: 1.2578 | Cls: 1.1632 | Alloc: 0.1892 | Acc: 52.78%
+  Temperature: 0.98
+  Avg Allocations:
+    clean          : RGB 5.5 | Depth 6.5
+    depth_occluded : RGB 6.3 | Depth 5.7
+    low_light      : RGB 4.9 | Depth 7.1
+  ✅ Saved best model (val_acc: 52.78%)
+============================================================
+
+Epoch 4/100:
+  Train - Loss: 2.0821 | Cls: 1.1632 | Alloc: 0.1838 | Acc: 45.83%
+  Val   - Loss: 1.2929 | Cls: 1.2129 | Alloc: 0.1601 | Acc: 47.22%
+  Temperature: 0.98
+  Avg Allocations:
+    clean          : RGB 6.9 | Depth 5.1
+    depth_occluded : RGB 6.7 | Depth 5.3
+    low_light      : RGB 4.4 | Depth 7.6
+============================================================
+
+Epoch 5/100:
+  Train - Loss: 1.7207 | Cls: 1.0283 | Alloc: 0.1385 | Acc: 56.55%
+  Val   - Loss: 1.0922 | Cls: 1.0265 | Alloc: 0.1312 | Acc: 41.67%
+  Temperature: 0.97
+  Avg Allocations:
+    clean          : RGB 8.0 | Depth 4.0
+    depth_occluded : RGB 8.2 | Depth 3.8
+    low_light      : RGB 4.2 | Depth 7.8
+============================================================
+
+Epoch 6/100:
+  Train - Loss: 1.5388 | Cls: 0.9795 | Alloc: 0.1119 | Acc: 51.19%
+  Val   - Loss: 0.9659 | Cls: 0.9036 | Alloc: 0.1247 | Acc: 55.56%
+  Temperature: 0.97
+  Avg Allocations:
+    clean          : RGB 7.9 | Depth 4.1
+    depth_occluded : RGB 7.8 | Depth 4.2
+    low_light      : RGB 4.2 | Depth 7.8
+  ✅ Saved best model (val_acc: 55.56%)
+============================================================
+
+Epoch 7/100:
+  Train - Loss: 1.4509 | Cls: 0.8206 | Alloc: 0.1261 | Acc: 64.88%
+  Val   - Loss: 0.8864 | Cls: 0.8187 | Alloc: 0.1354 | Acc: 66.67%
+  Temperature: 0.96
+  Avg Allocations:
+    clean          : RGB 7.1 | Depth 4.9
+    depth_occluded : RGB 8.0 | Depth 4.0
+    low_light      : RGB 4.9 | Depth 7.1
+  ✅ Saved best model (val_acc: 66.67%)
+============================================================
+
+Epoch 8/100:
+  Train - Loss: 1.2744 | Cls: 0.7520 | Alloc: 0.1045 | Acc: 70.83%
+  Val   - Loss: 1.0288 | Cls: 0.9568 | Alloc: 0.1441 | Acc: 58.33%
+  Temperature: 0.96
+  Avg Allocations:
+    clean          : RGB 6.6 | Depth 5.4
+    depth_occluded : RGB 7.7 | Depth 4.3
+    low_light      : RGB 4.8 | Depth 7.2
+============================================================
+
+Epoch 9/100:
+  Train - Loss: 1.3775 | Cls: 0.7695 | Alloc: 0.1216 | Acc: 63.10%
+  Val   - Loss: 0.9672 | Cls: 0.8914 | Alloc: 0.1517 | Acc: 58.33%
+  Temperature: 0.95
+  Avg Allocations:
+    clean          : RGB 6.9 | Depth 5.1
+    depth_occluded : RGB 7.5 | Depth 4.5
+    low_light      : RGB 4.8 | Depth 7.2
+============================================================
+
+Epoch 10/100:
+  Train - Loss: 1.3554 | Cls: 0.7627 | Alloc: 0.1186 | Acc: 66.07%
+  Val   - Loss: 1.2897 | Cls: 1.2236 | Alloc: 0.1323 | Acc: 44.44%
+  Temperature: 0.95
+  Avg Allocations:
+    clean          : RGB 5.7 | Depth 6.3
+    depth_occluded : RGB 7.3 | Depth 4.7
+    low_light      : RGB 4.1 | Depth 7.9
+============================================================
+
+Epoch 11/100:
+  Train - Loss: 1.2201 | Cls: 0.5302 | Alloc: 0.1380 | Acc: 80.95%
+  Val   - Loss: 0.7106 | Cls: 0.6260 | Alloc: 0.1691 | Acc: 66.67%
+  Temperature: 0.94
+  Avg Allocations:
+    clean          : RGB 5.1 | Depth 6.9
+    depth_occluded : RGB 6.5 | Depth 5.5
+    low_light      : RGB 4.0 | Depth 8.0
+============================================================
+
+Epoch 12/100:
+  Train - Loss: 1.0876 | Cls: 0.4667 | Alloc: 0.1242 | Acc: 86.31%
+  Val   - Loss: 0.9055 | Cls: 0.8401 | Alloc: 0.1309 | Acc: 69.44%
+  Temperature: 0.94
+  Avg Allocations:
+    clean          : RGB 6.5 | Depth 5.5
+    depth_occluded : RGB 7.5 | Depth 4.5
+    low_light      : RGB 4.4 | Depth 7.6
+  ✅ Saved best model (val_acc: 69.44%)
+============================================================
+
+Epoch 13/100:
+  Train - Loss: 0.9681 | Cls: 0.3538 | Alloc: 0.1229 | Acc: 87.50%
+  Val   - Loss: 0.5086 | Cls: 0.4331 | Alloc: 0.1510 | Acc: 77.78%
+  Temperature: 0.94
+  Avg Allocations:
+    clean          : RGB 7.4 | Depth 4.6
+    depth_occluded : RGB 7.5 | Depth 4.5
+    low_light      : RGB 4.8 | Depth 7.2
+  ✅ Saved best model (val_acc: 77.78%)
+============================================================
+
+Epoch 14/100:
+  Train - Loss: 1.1316 | Cls: 0.4338 | Alloc: 0.1396 | Acc: 85.71%
+  Val   - Loss: 1.0898 | Cls: 1.0237 | Alloc: 0.1323 | Acc: 66.67%
+  Temperature: 0.93
+  Avg Allocations:
+    clean          : RGB 7.5 | Depth 4.5
+    depth_occluded : RGB 7.7 | Depth 4.3
+    low_light      : RGB 4.4 | Depth 7.6
+============================================================
+
+Epoch 15/100:
+  Train - Loss: 1.1861 | Cls: 0.6037 | Alloc: 0.1165 | Acc: 78.57%
+  Val   - Loss: 0.8966 | Cls: 0.8339 | Alloc: 0.1253 | Acc: 61.11%
+  Temperature: 0.93
+  Avg Allocations:
+    clean          : RGB 6.3 | Depth 5.7
+    depth_occluded : RGB 7.5 | Depth 4.5
+    low_light      : RGB 4.0 | Depth 8.0
+============================================================
+
+Epoch 16/100:
+  Train - Loss: 1.0143 | Cls: 0.4687 | Alloc: 0.1091 | Acc: 82.74%
+  Val   - Loss: 0.9717 | Cls: 0.8988 | Alloc: 0.1458 | Acc: 66.67%
+  Temperature: 0.92
+  Avg Allocations:
+    clean          : RGB 6.5 | Depth 5.5
+    depth_occluded : RGB 8.0 | Depth 4.0
+    low_light      : RGB 4.8 | Depth 7.2
+============================================================
+
+Epoch 17/100:
+  Train - Loss: 1.0048 | Cls: 0.3963 | Alloc: 0.1217 | Acc: 87.50%
+  Val   - Loss: 0.8710 | Cls: 0.8023 | Alloc: 0.1375 | Acc: 61.11%
+  Temperature: 0.92
+  Avg Allocations:
+    clean          : RGB 6.3 | Depth 5.7
+    depth_occluded : RGB 7.2 | Depth 4.8
+    low_light      : RGB 4.0 | Depth 8.0
+============================================================
+
+Epoch 18/100:
+  Train - Loss: 0.6889 | Cls: 0.1660 | Alloc: 0.1046 | Acc: 94.05%
+  Val   - Loss: 0.5799 | Cls: 0.5243 | Alloc: 0.1111 | Acc: 88.89%
+  Temperature: 0.91
+  Avg Allocations:
+    clean          : RGB 6.8 | Depth 5.2
+    depth_occluded : RGB 8.2 | Depth 3.8
+    low_light      : RGB 4.3 | Depth 7.7
+  ✅ Saved best model (val_acc: 88.89%)
+============================================================
+
+Epoch 19/100:
+  Train - Loss: 0.8172 | Cls: 0.2777 | Alloc: 0.1079 | Acc: 92.26%
+  Val   - Loss: 0.9002 | Cls: 0.8415 | Alloc: 0.1174 | Acc: 63.89%
+  Temperature: 0.91
+  Avg Allocations:
+    clean          : RGB 5.5 | Depth 6.5
+    depth_occluded : RGB 7.5 | Depth 4.5
+    low_light      : RGB 3.3 | Depth 8.7
+============================================================
+
+Epoch 20/100:
+  Train - Loss: 0.9199 | Cls: 0.3420 | Alloc: 0.1156 | Acc: 88.69%
+  Val   - Loss: 0.9278 | Cls: 0.8499 | Alloc: 0.1559 | Acc: 77.78%
+  Temperature: 0.90
+  Avg Allocations:
+    clean          : RGB 7.7 | Depth 4.3
+    depth_occluded : RGB 8.1 | Depth 3.9
+    low_light      : RGB 5.2 | Depth 6.8
+============================================================
+
+Epoch 21/100:
+  Train - Loss: 0.7861 | Cls: 0.2281 | Alloc: 0.1116 | Acc: 93.45%
+  Val   - Loss: 0.9944 | Cls: 0.9560 | Alloc: 0.0767 | Acc: 69.44%
+  Temperature: 0.90
+  Avg Allocations:
+    clean          : RGB 6.8 | Depth 5.2
+    depth_occluded : RGB 8.5 | Depth 3.5
+    low_light      : RGB 3.6 | Depth 8.4
+============================================================
+
+Epoch 22/100:
+  Train - Loss: 0.4827 | Cls: 0.1016 | Alloc: 0.0762 | Acc: 96.43%
+  Val   - Loss: 0.7274 | Cls: 0.6910 | Alloc: 0.0729 | Acc: 86.11%
+  Temperature: 0.89
+  Avg Allocations:
+    clean          : RGB 6.4 | Depth 5.6
+    depth_occluded : RGB 8.8 | Depth 3.2
+    low_light      : RGB 3.1 | Depth 8.9
+============================================================
+
+Epoch 23/100:
+  Train - Loss: 0.5619 | Cls: 0.0973 | Alloc: 0.0929 | Acc: 97.62%
+  Val   - Loss: 1.2394 | Cls: 1.1891 | Alloc: 0.1007 | Acc: 69.44%
+  Temperature: 0.89
+  Avg Allocations:
+    clean          : RGB 7.7 | Depth 4.3
+    depth_occluded : RGB 8.3 | Depth 3.7
+    low_light      : RGB 3.7 | Depth 8.3
+============================================================
+
+Epoch 24/100:
+  Train - Loss: 0.7858 | Cls: 0.1256 | Alloc: 0.1320 | Acc: 96.43%
+  Val   - Loss: 1.1064 | Cls: 1.0247 | Alloc: 0.1635 | Acc: 83.33%
+  Temperature: 0.88
+  Avg Allocations:
+    clean          : RGB 8.6 | Depth 3.4
+    depth_occluded : RGB 8.6 | Depth 3.4
+    low_light      : RGB 5.3 | Depth 6.7
+============================================================
+
+Epoch 25/100:
+  Train - Loss: 0.8351 | Cls: 0.2143 | Alloc: 0.1242 | Acc: 94.05%
+  Val   - Loss: 0.9594 | Cls: 0.8966 | Alloc: 0.1257 | Acc: 80.56%
+  Temperature: 0.88
+  Avg Allocations:
+    clean          : RGB 8.4 | Depth 3.6
+    depth_occluded : RGB 8.6 | Depth 3.4
+    low_light      : RGB 4.6 | Depth 7.4
+============================================================
+
+Epoch 26/100:
+  Train - Loss: 0.6540 | Cls: 0.1224 | Alloc: 0.1063 | Acc: 95.24%
+  Val   - Loss: 0.6395 | Cls: 0.5822 | Alloc: 0.1146 | Acc: 83.33%
+  Temperature: 0.87
+  Avg Allocations:
+    clean          : RGB 7.9 | Depth 4.1
+    depth_occluded : RGB 8.5 | Depth 3.5
+    low_light      : RGB 4.2 | Depth 7.8
+============================================================
+
+Epoch 27/100:
+  Train - Loss: 0.7899 | Cls: 0.1666 | Alloc: 0.1247 | Acc: 95.24%
+  Val   - Loss: 1.0738 | Cls: 1.0064 | Alloc: 0.1347 | Acc: 75.00%
+  Temperature: 0.86
+  Avg Allocations:
+    clean          : RGB 8.2 | Depth 3.8
+    depth_occluded : RGB 8.7 | Depth 3.3
+    low_light      : RGB 5.0 | Depth 7.0
+============================================================
+
+Epoch 28/100:
+  Train - Loss: 0.6811 | Cls: 0.1446 | Alloc: 0.1073 | Acc: 95.24%
+  Val   - Loss: 0.6055 | Cls: 0.5526 | Alloc: 0.1059 | Acc: 75.00%
+  Temperature: 0.86
+  Avg Allocations:
+    clean          : RGB 8.2 | Depth 3.8
+    depth_occluded : RGB 8.6 | Depth 3.4
+    low_light      : RGB 4.1 | Depth 7.9
+============================================================
+
+Epoch 29/100:
+  Train - Loss: 0.6398 | Cls: 0.1024 | Alloc: 0.1075 | Acc: 96.43%
+  Val   - Loss: 0.8703 | Cls: 0.8307 | Alloc: 0.0792 | Acc: 75.00%
+  Temperature: 0.85
+  Avg Allocations:
+    clean          : RGB 8.5 | Depth 3.5
+    depth_occluded : RGB 9.2 | Depth 2.8
+    low_light      : RGB 3.3 | Depth 8.7
+============================================================
+
+Epoch 30/100:
+  Train - Loss: 0.5675 | Cls: 0.0644 | Alloc: 0.1006 | Acc: 98.81%
+  Val   - Loss: 0.7000 | Cls: 0.6462 | Alloc: 0.1076 | Acc: 86.11%
+  Temperature: 0.85
+  Avg Allocations:
+    clean          : RGB 8.2 | Depth 3.8
+    depth_occluded : RGB 8.4 | Depth 3.6
+    low_light      : RGB 3.8 | Depth 8.2
+============================================================
+
+Epoch 31/100:
+  Train - Loss: 0.5937 | Cls: 0.0981 | Alloc: 0.0991 | Acc: 97.02%
+  Val   - Loss: 0.6373 | Cls: 0.5875 | Alloc: 0.0997 | Acc: 77.78%
+  Temperature: 0.84
+  Avg Allocations:
+    clean          : RGB 8.4 | Depth 3.6
+    depth_occluded : RGB 8.9 | Depth 3.1
+    low_light      : RGB 3.7 | Depth 8.3
+============================================================
+
+Epoch 32/100:
+  Train - Loss: 0.5444 | Cls: 0.0471 | Alloc: 0.0995 | Acc: 98.21%
+  Val   - Loss: 0.9494 | Cls: 0.9070 | Alloc: 0.0847 | Acc: 75.00%
+  Temperature: 0.84
+  Avg Allocations:
+    clean          : RGB 7.9 | Depth 4.1
+    depth_occluded : RGB 8.6 | Depth 3.4
+    low_light      : RGB 3.6 | Depth 8.4
+============================================================
+
+Epoch 33/100:
+  Train - Loss: 0.6655 | Cls: 0.1153 | Alloc: 0.1100 | Acc: 95.83%
+  Val   - Loss: 1.0631 | Cls: 1.0022 | Alloc: 0.1219 | Acc: 75.00%
+  Temperature: 0.83
+  Avg Allocations:
+    clean          : RGB 8.1 | Depth 3.9
+    depth_occluded : RGB 8.7 | Depth 3.3
+    low_light      : RGB 4.3 | Depth 7.7
+============================================================
+
+Epoch 34/100:
+  Train - Loss: 0.7528 | Cls: 0.1948 | Alloc: 0.1116 | Acc: 93.45%
+  Val   - Loss: 0.4686 | Cls: 0.4008 | Alloc: 0.1354 | Acc: 88.89%
+  Temperature: 0.83
+  Avg Allocations:
+    clean          : RGB 7.9 | Depth 4.1
+    depth_occluded : RGB 7.7 | Depth 4.3
+    low_light      : RGB 3.9 | Depth 8.1
+============================================================
+
+Epoch 35/100:
+  Train - Loss: 0.6265 | Cls: 0.1197 | Alloc: 0.1014 | Acc: 97.62%
+  Val   - Loss: 0.7349 | Cls: 0.6824 | Alloc: 0.1049 | Acc: 80.56%
+  Temperature: 0.82
+  Avg Allocations:
+    clean          : RGB 7.2 | Depth 4.8
+    depth_occluded : RGB 8.2 | Depth 3.8
+    low_light      : RGB 3.9 | Depth 8.1
+============================================================
+
+Epoch 36/100:
+  Train - Loss: 0.6208 | Cls: 0.1128 | Alloc: 0.1016 | Acc: 96.43%
+  Val   - Loss: 0.3282 | Cls: 0.2778 | Alloc: 0.1007 | Acc: 91.67%
+  Temperature: 0.82
+  Avg Allocations:
+    clean          : RGB 7.9 | Depth 4.1
+    depth_occluded : RGB 8.4 | Depth 3.6
+    low_light      : RGB 3.6 | Depth 8.4
+  ✅ Saved best model (val_acc: 91.67%)
+============================================================
+
+Epoch 37/100:
+  Train - Loss: 0.4750 | Cls: 0.0257 | Alloc: 0.0899 | Acc: 100.00%
+  Val   - Loss: 0.6516 | Cls: 0.5932 | Alloc: 0.1167 | Acc: 88.89%
+  Temperature: 0.81
+  Avg Allocations:
+    clean          : RGB 8.5 | Depth 3.5
+    depth_occluded : RGB 8.4 | Depth 3.6
+    low_light      : RGB 4.0 | Depth 8.0
+============================================================
+
+Epoch 38/100:
+  Train - Loss: 0.5543 | Cls: 0.0648 | Alloc: 0.0979 | Acc: 98.21%
+  Val   - Loss: 0.3143 | Cls: 0.2611 | Alloc: 0.1062 | Acc: 91.67%
+  Temperature: 0.81
+  Avg Allocations:
+    clean          : RGB 7.0 | Depth 5.0
+    depth_occluded : RGB 7.5 | Depth 4.5
+    low_light      : RGB 3.3 | Depth 8.7
+============================================================
+
+Epoch 39/100:
+  Train - Loss: 0.7052 | Cls: 0.1310 | Alloc: 0.1148 | Acc: 95.83%
+  Val   - Loss: 1.1521 | Cls: 1.0936 | Alloc: 0.1170 | Acc: 80.56%
+  Temperature: 0.80
+  Avg Allocations:
+    clean          : RGB 6.9 | Depth 5.1
+    depth_occluded : RGB 7.2 | Depth 4.8
+    low_light      : RGB 3.4 | Depth 8.6
+============================================================
+
+Epoch 40/100:
+  Train - Loss: 0.7254 | Cls: 0.1343 | Alloc: 0.1182 | Acc: 94.64%
+  Val   - Loss: 0.3842 | Cls: 0.3231 | Alloc: 0.1222 | Acc: 88.89%
+  Temperature: 0.80
+  Avg Allocations:
+    clean          : RGB 6.7 | Depth 5.3
+    depth_occluded : RGB 7.5 | Depth 4.5
+    low_light      : RGB 3.3 | Depth 8.7
+============================================================
+
+Epoch 41/100:
+  Train - Loss: 0.6942 | Cls: 0.1304 | Alloc: 0.1128 | Acc: 97.62%
+  Val   - Loss: 0.1542 | Cls: 0.0834 | Alloc: 0.1417 | Acc: 97.22%
+  Temperature: 0.80
+  Avg Allocations:
+    clean          : RGB 6.5 | Depth 5.5
+    depth_occluded : RGB 7.0 | Depth 5.0
+    low_light      : RGB 4.2 | Depth 7.8
+  ✅ Saved best model (val_acc: 97.22%)
+============================================================
+
+Epoch 42/100:
+  Train - Loss: 0.6961 | Cls: 0.1162 | Alloc: 0.1160 | Acc: 96.43%
+  Val   - Loss: 0.6787 | Cls: 0.6102 | Alloc: 0.1372 | Acc: 83.33%
+  Temperature: 0.79
+  Avg Allocations:
+    clean          : RGB 7.4 | Depth 4.6
+    depth_occluded : RGB 7.2 | Depth 4.8
+    low_light      : RGB 4.1 | Depth 7.9
+============================================================
+
+Epoch 43/100:
+  Train - Loss: 0.6724 | Cls: 0.0797 | Alloc: 0.1186 | Acc: 98.21%
+  Val   - Loss: 0.7766 | Cls: 0.6986 | Alloc: 0.1559 | Acc: 83.33%
+  Temperature: 0.79
+  Avg Allocations:
+    clean          : RGB 7.0 | Depth 5.0
+    depth_occluded : RGB 7.2 | Depth 4.8
+    low_light      : RGB 4.7 | Depth 7.3
+============================================================
+
+Epoch 44/100:
+  Train - Loss: 0.6503 | Cls: 0.0769 | Alloc: 0.1147 | Acc: 98.21%
+  Val   - Loss: 0.8133 | Cls: 0.7609 | Alloc: 0.1049 | Acc: 83.33%
+  Temperature: 0.78
+  Avg Allocations:
+    clean          : RGB 7.1 | Depth 4.9
+    depth_occluded : RGB 8.0 | Depth 4.0
+    low_light      : RGB 3.3 | Depth 8.7
+============================================================
+
+Epoch 45/100:
+  Train - Loss: 0.6129 | Cls: 0.0627 | Alloc: 0.1100 | Acc: 98.81%
+  Val   - Loss: 1.3935 | Cls: 1.3124 | Alloc: 0.1622 | Acc: 72.22%
+  Temperature: 0.78
+  Avg Allocations:
+    clean          : RGB 6.9 | Depth 5.1
+    depth_occluded : RGB 7.0 | Depth 5.0
+    low_light      : RGB 4.5 | Depth 7.5
+============================================================
+
+Epoch 46/100:
+  Train - Loss: 0.6234 | Cls: 0.0831 | Alloc: 0.1081 | Acc: 98.21%
+  Val   - Loss: 0.5134 | Cls: 0.4617 | Alloc: 0.1035 | Acc: 88.89%
+  Temperature: 0.77
+  Avg Allocations:
+    clean          : RGB 7.3 | Depth 4.7
+    depth_occluded : RGB 7.8 | Depth 4.2
+    low_light      : RGB 3.6 | Depth 8.4
+============================================================
+
+Epoch 47/100:
+  Train - Loss: 0.6511 | Cls: 0.0638 | Alloc: 0.1175 | Acc: 98.21%
+  Val   - Loss: 0.4781 | Cls: 0.4100 | Alloc: 0.1361 | Acc: 91.67%
+  Temperature: 0.77
+  Avg Allocations:
+    clean          : RGB 7.7 | Depth 4.3
+    depth_occluded : RGB 7.4 | Depth 4.6
+    low_light      : RGB 4.1 | Depth 7.9
+============================================================
+
+Epoch 48/100:
+  Train - Loss: 0.6458 | Cls: 0.1052 | Alloc: 0.1081 | Acc: 97.62%
+  Val   - Loss: 0.3738 | Cls: 0.3217 | Alloc: 0.1042 | Acc: 83.33%
+  Temperature: 0.76
+  Avg Allocations:
+    clean          : RGB 7.1 | Depth 4.9
+    depth_occluded : RGB 7.8 | Depth 4.2
+    low_light      : RGB 3.6 | Depth 8.4
+============================================================
+
+Epoch 49/100:
+  Train - Loss: 0.7117 | Cls: 0.1003 | Alloc: 0.1223 | Acc: 97.62%
+  Val   - Loss: 0.4872 | Cls: 0.4265 | Alloc: 0.1215 | Acc: 88.89%
+  Temperature: 0.76
+  Avg Allocations:
+    clean          : RGB 8.2 | Depth 3.8
+    depth_occluded : RGB 7.9 | Depth 4.1
+    low_light      : RGB 4.1 | Depth 7.9
+============================================================
+
+Epoch 50/100:
+  Train - Loss: 0.6861 | Cls: 0.0387 | Alloc: 0.1295 | Acc: 98.21%
+  Val   - Loss: 0.9449 | Cls: 0.8780 | Alloc: 0.1337 | Acc: 83.33%
+  Temperature: 0.75
+  Avg Allocations:
+    clean          : RGB 7.4 | Depth 4.6
+    depth_occluded : RGB 7.9 | Depth 4.1
+    low_light      : RGB 4.5 | Depth 7.5
+============================================================
+
+Epoch 51/100:
+  Train - Loss: 0.7229 | Cls: 0.1368 | Alloc: 0.1172 | Acc: 97.62%
+  Val   - Loss: 1.1599 | Cls: 1.1019 | Alloc: 0.1160 | Acc: 72.22%
+  Temperature: 0.74
+  Avg Allocations:
+    clean          : RGB 7.0 | Depth 5.0
+    depth_occluded : RGB 7.6 | Depth 4.4
+    low_light      : RGB 3.9 | Depth 8.1
+============================================================
+
+Epoch 52/100:
+  Train - Loss: 0.6627 | Cls: 0.0844 | Alloc: 0.1157 | Acc: 97.62%
+  Val   - Loss: 0.5295 | Cls: 0.4670 | Alloc: 0.1250 | Acc: 88.89%
+  Temperature: 0.74
+  Avg Allocations:
+    clean          : RGB 7.5 | Depth 4.5
+    depth_occluded : RGB 7.8 | Depth 4.2
+    low_light      : RGB 4.1 | Depth 7.9
+============================================================
+
+Epoch 53/100:
+  Train - Loss: 0.5592 | Cls: 0.0194 | Alloc: 0.1080 | Acc: 100.00%
+  Val   - Loss: 0.4546 | Cls: 0.3903 | Alloc: 0.1285 | Acc: 91.67%
+  Temperature: 0.73
+  Avg Allocations:
+    clean          : RGB 6.8 | Depth 5.2
+    depth_occluded : RGB 7.5 | Depth 4.5
+    low_light      : RGB 4.0 | Depth 8.0
+============================================================
+
+Epoch 54/100:
+  Train - Loss: 0.5605 | Cls: 0.0211 | Alloc: 0.1079 | Acc: 99.40%
+  Val   - Loss: 0.7889 | Cls: 0.7356 | Alloc: 0.1066 | Acc: 83.33%
+  Temperature: 0.73
+  Avg Allocations:
+    clean          : RGB 7.1 | Depth 4.9
+    depth_occluded : RGB 8.1 | Depth 3.9
+    low_light      : RGB 4.1 | Depth 7.9
+============================================================
+
+Epoch 55/100:
+  Train - Loss: 0.6242 | Cls: 0.0409 | Alloc: 0.1167 | Acc: 99.40%
+  Val   - Loss: 0.7573 | Cls: 0.6846 | Alloc: 0.1455 | Acc: 86.11%
+  Temperature: 0.72
+  Avg Allocations:
+    clean          : RGB 7.6 | Depth 4.4
+    depth_occluded : RGB 7.5 | Depth 4.5
+    low_light      : RGB 4.2 | Depth 7.8
+============================================================
+
+Epoch 56/100:
+  Train - Loss: 0.5268 | Cls: 0.0080 | Alloc: 0.1038 | Acc: 100.00%
+  Val   - Loss: 0.4612 | Cls: 0.4097 | Alloc: 0.1031 | Acc: 91.67%
+  Temperature: 0.72
+  Avg Allocations:
+    clean          : RGB 7.3 | Depth 4.7
+    depth_occluded : RGB 8.1 | Depth 3.9
+    low_light      : RGB 4.2 | Depth 7.8
+============================================================
+
+Epoch 57/100:
+  Train - Loss: 0.6047 | Cls: 0.0434 | Alloc: 0.1123 | Acc: 98.81%
+  Val   - Loss: 0.7679 | Cls: 0.7141 | Alloc: 0.1076 | Acc: 80.56%
+  Temperature: 0.72
+  Avg Allocations:
+    clean          : RGB 7.6 | Depth 4.4
+    depth_occluded : RGB 8.0 | Depth 4.0
+    low_light      : RGB 3.7 | Depth 8.3
+============================================================
+
+Epoch 58/100:
+  Train - Loss: 0.6105 | Cls: 0.1033 | Alloc: 0.1014 | Acc: 97.62%
+  Val   - Loss: 1.1357 | Cls: 1.0789 | Alloc: 0.1135 | Acc: 77.78%
+  Temperature: 0.71
+  Avg Allocations:
+    clean          : RGB 7.7 | Depth 4.3
+    depth_occluded : RGB 7.8 | Depth 4.2
+    low_light      : RGB 3.9 | Depth 8.1
+============================================================
+
+Epoch 59/100:
+  Train - Loss: 0.6361 | Cls: 0.1000 | Alloc: 0.1072 | Acc: 97.62%
+  Val   - Loss: 0.5830 | Cls: 0.5342 | Alloc: 0.0976 | Acc: 91.67%
+  Temperature: 0.71
+  Avg Allocations:
+    clean          : RGB 7.4 | Depth 4.6
+    depth_occluded : RGB 8.6 | Depth 3.4
+    low_light      : RGB 4.2 | Depth 7.8
+============================================================
+
+Epoch 60/100:
+  Train - Loss: 0.6216 | Cls: 0.0723 | Alloc: 0.1099 | Acc: 97.62%
+  Val   - Loss: 1.1410 | Cls: 1.0936 | Alloc: 0.0948 | Acc: 77.78%
+  Temperature: 0.70
+  Avg Allocations:
+    clean          : RGB 7.5 | Depth 4.5
+    depth_occluded : RGB 8.2 | Depth 3.8
+    low_light      : RGB 3.8 | Depth 8.2
+============================================================
+
+Epoch 61/100:
+  Train - Loss: 0.6757 | Cls: 0.1243 | Alloc: 0.1103 | Acc: 96.43%
+  Val   - Loss: 0.7041 | Cls: 0.6576 | Alloc: 0.0931 | Acc: 80.56%
+  Temperature: 0.70
+  Avg Allocations:
+    clean          : RGB 7.5 | Depth 4.5
+    depth_occluded : RGB 8.1 | Depth 3.9
+    low_light      : RGB 3.3 | Depth 8.7
+============================================================
+
+Epoch 62/100:
+  Train - Loss: 0.5859 | Cls: 0.0874 | Alloc: 0.0997 | Acc: 97.02%
+  Val   - Loss: 0.5975 | Cls: 0.5447 | Alloc: 0.1056 | Acc: 86.11%
+  Temperature: 0.69
+  Avg Allocations:
+    clean          : RGB 7.6 | Depth 4.4
+    depth_occluded : RGB 8.0 | Depth 4.0
+    low_light      : RGB 3.9 | Depth 8.1
+============================================================
+
+Epoch 63/100:
+  Train - Loss: 0.5745 | Cls: 0.0851 | Alloc: 0.0979 | Acc: 97.62%
+  Val   - Loss: 0.9695 | Cls: 0.9254 | Alloc: 0.0882 | Acc: 75.00%
+  Temperature: 0.69
+  Avg Allocations:
+    clean          : RGB 7.2 | Depth 4.8
+    depth_occluded : RGB 8.2 | Depth 3.8
+    low_light      : RGB 3.8 | Depth 8.2
+============================================================
+
+Epoch 64/100:
+  Train - Loss: 0.5750 | Cls: 0.0422 | Alloc: 0.1066 | Acc: 98.81%
+  Val   - Loss: 0.4471 | Cls: 0.3954 | Alloc: 0.1035 | Acc: 91.67%
+  Temperature: 0.68
+  Avg Allocations:
+    clean          : RGB 7.8 | Depth 4.2
+    depth_occluded : RGB 8.2 | Depth 3.8
+    low_light      : RGB 3.8 | Depth 8.2
+============================================================
+
+Epoch 65/100:
+  Train - Loss: 0.6567 | Cls: 0.0822 | Alloc: 0.1149 | Acc: 96.43%
+  Val   - Loss: 0.6247 | Cls: 0.5547 | Alloc: 0.1399 | Acc: 86.11%
+  Temperature: 0.68
+  Avg Allocations:
+    clean          : RGB 7.9 | Depth 4.1
+    depth_occluded : RGB 7.8 | Depth 4.2
+    low_light      : RGB 4.4 | Depth 7.6
+============================================================
+
+Epoch 66/100:
+  Train - Loss: 0.5248 | Cls: 0.0123 | Alloc: 0.1025 | Acc: 100.00%
+  Val   - Loss: 0.7296 | Cls: 0.6736 | Alloc: 0.1122 | Acc: 86.11%
+  Temperature: 0.67
+  Avg Allocations:
+    clean          : RGB 7.4 | Depth 4.6
+    depth_occluded : RGB 8.1 | Depth 3.9
+    low_light      : RGB 4.1 | Depth 7.9
+============================================================
+
+Epoch 67/100:
+  Train - Loss: 0.4625 | Cls: 0.0078 | Alloc: 0.0909 | Acc: 100.00%
+  Val   - Loss: 0.8952 | Cls: 0.8419 | Alloc: 0.1066 | Acc: 83.33%
+  Temperature: 0.67
+  Avg Allocations:
+    clean          : RGB 6.6 | Depth 5.4
+    depth_occluded : RGB 7.8 | Depth 4.2
+    low_light      : RGB 3.7 | Depth 8.3
+============================================================
+
+Epoch 68/100:
+  Train - Loss: 0.5437 | Cls: 0.0059 | Alloc: 0.1076 | Acc: 100.00%
+  Val   - Loss: 0.4457 | Cls: 0.3879 | Alloc: 0.1156 | Acc: 91.67%
+  Temperature: 0.66
+  Avg Allocations:
+    clean          : RGB 7.7 | Depth 4.3
+    depth_occluded : RGB 8.2 | Depth 3.8
+    low_light      : RGB 4.2 | Depth 7.8
+============================================================
+
+Epoch 69/100:
+  Train - Loss: 0.4934 | Cls: 0.0193 | Alloc: 0.0948 | Acc: 98.81%
+  Val   - Loss: 0.4593 | Cls: 0.4105 | Alloc: 0.0976 | Acc: 88.89%
+  Temperature: 0.66
+  Avg Allocations:
+    clean          : RGB 7.9 | Depth 4.1
+    depth_occluded : RGB 8.1 | Depth 3.9
+    low_light      : RGB 3.5 | Depth 8.5
+============================================================
+
+Epoch 70/100:
+  Train - Loss: 0.5429 | Cls: 0.0865 | Alloc: 0.0913 | Acc: 98.21%
+  Val   - Loss: 0.7735 | Cls: 0.7350 | Alloc: 0.0771 | Acc: 86.11%
+  Temperature: 0.65
+  Avg Allocations:
+    clean          : RGB 7.4 | Depth 4.6
+    depth_occluded : RGB 8.3 | Depth 3.7
+    low_light      : RGB 3.1 | Depth 8.9
+============================================================
+
+Epoch 71/100:
+  Train - Loss: 0.5270 | Cls: 0.0421 | Alloc: 0.0970 | Acc: 98.81%
+  Val   - Loss: 0.7278 | Cls: 0.6735 | Alloc: 0.1087 | Acc: 88.89%
+  Temperature: 0.65
+  Avg Allocations:
+    clean          : RGB 6.8 | Depth 5.2
+    depth_occluded : RGB 7.7 | Depth 4.3
+    low_light      : RGB 3.8 | Depth 8.2
+============================================================
+
+Epoch 72/100:
+  Train - Loss: 0.5719 | Cls: 0.0234 | Alloc: 0.1097 | Acc: 99.40%
+  Val   - Loss: 0.5205 | Cls: 0.4714 | Alloc: 0.0983 | Acc: 83.33%
+  Temperature: 0.64
+  Avg Allocations:
+    clean          : RGB 6.9 | Depth 5.1
+    depth_occluded : RGB 7.8 | Depth 4.2
+    low_light      : RGB 3.5 | Depth 8.5
+============================================================
+
+Epoch 73/100:
+  Train - Loss: 0.4939 | Cls: 0.0260 | Alloc: 0.0936 | Acc: 99.40%
+  Val   - Loss: 0.6615 | Cls: 0.6226 | Alloc: 0.0778 | Acc: 88.89%
+  Temperature: 0.64
+  Avg Allocations:
+    clean          : RGB 6.9 | Depth 5.1
+    depth_occluded : RGB 7.9 | Depth 4.1
+    low_light      : RGB 3.1 | Depth 8.9
+============================================================
+
+Epoch 74/100:
+  Train - Loss: 0.5291 | Cls: 0.0066 | Alloc: 0.1045 | Acc: 100.00%
+  Val   - Loss: 0.6660 | Cls: 0.6215 | Alloc: 0.0889 | Acc: 91.67%
+  Temperature: 0.63
+  Avg Allocations:
+    clean          : RGB 7.1 | Depth 4.9
+    depth_occluded : RGB 8.6 | Depth 3.4
+    low_light      : RGB 3.5 | Depth 8.5
+============================================================
+
+Epoch 75/100:
+  Train - Loss: 0.5064 | Cls: 0.0418 | Alloc: 0.0929 | Acc: 98.81%
+  Val   - Loss: 0.4568 | Cls: 0.4049 | Alloc: 0.1038 | Acc: 91.67%
+  Temperature: 0.62
+  Avg Allocations:
+    clean          : RGB 7.2 | Depth 4.8
+    depth_occluded : RGB 7.7 | Depth 4.3
+    low_light      : RGB 3.4 | Depth 8.6
+============================================================
+
+Epoch 76/100:
+  Train - Loss: 0.4781 | Cls: 0.0246 | Alloc: 0.0907 | Acc: 99.40%
+  Val   - Loss: 0.9787 | Cls: 0.9325 | Alloc: 0.0924 | Acc: 80.56%
+  Temperature: 0.62
+  Avg Allocations:
+    clean          : RGB 7.1 | Depth 4.9
+    depth_occluded : RGB 7.7 | Depth 4.3
+    low_light      : RGB 3.2 | Depth 8.8
+============================================================
+
+Epoch 77/100:
+  Train - Loss: 0.5102 | Cls: 0.0597 | Alloc: 0.0901 | Acc: 98.81%
+  Val   - Loss: 0.7400 | Cls: 0.6913 | Alloc: 0.0972 | Acc: 86.11%
+  Temperature: 0.61
+  Avg Allocations:
+    clean          : RGB 7.5 | Depth 4.5
+    depth_occluded : RGB 7.8 | Depth 4.2
+    low_light      : RGB 3.3 | Depth 8.7
+============================================================
+
+Epoch 78/100:
+  Train - Loss: 0.4624 | Cls: 0.0069 | Alloc: 0.0911 | Acc: 100.00%
+  Val   - Loss: 0.6299 | Cls: 0.5822 | Alloc: 0.0955 | Acc: 88.89%
+  Temperature: 0.61
+  Avg Allocations:
+    clean          : RGB 7.6 | Depth 4.4
+    depth_occluded : RGB 7.8 | Depth 4.2
+    low_light      : RGB 2.8 | Depth 9.2
+============================================================
+
+Epoch 79/100:
+  Train - Loss: 0.4734 | Cls: 0.0361 | Alloc: 0.0875 | Acc: 98.81%
+  Val   - Loss: 0.7730 | Cls: 0.7146 | Alloc: 0.1167 | Acc: 86.11%
+  Temperature: 0.60
+  Avg Allocations:
+    clean          : RGB 6.5 | Depth 5.5
+    depth_occluded : RGB 7.5 | Depth 4.5
+    low_light      : RGB 3.7 | Depth 8.3
+============================================================
+
+Epoch 80/100:
+  Train - Loss: 0.4674 | Cls: 0.0839 | Alloc: 0.0767 | Acc: 98.21%
+  Val   - Loss: 1.1397 | Cls: 1.0883 | Alloc: 0.1028 | Acc: 80.56%
+  Temperature: 0.60
+  Avg Allocations:
+    clean          : RGB 6.9 | Depth 5.1
+    depth_occluded : RGB 7.7 | Depth 4.3
+    low_light      : RGB 3.4 | Depth 8.6
+============================================================
+
+Epoch 81/100:
+  Train - Loss: 0.4928 | Cls: 0.0438 | Alloc: 0.0898 | Acc: 98.81%
+  Val   - Loss: 0.3911 | Cls: 0.3479 | Alloc: 0.0865 | Acc: 88.89%
+  Temperature: 0.59
+  Avg Allocations:
+    clean          : RGB 7.2 | Depth 4.8
+    depth_occluded : RGB 7.7 | Depth 4.3
+    low_light      : RGB 2.9 | Depth 9.1
+============================================================
+
+Epoch 82/100:
+  Train - Loss: 0.4732 | Cls: 0.0139 | Alloc: 0.0918 | Acc: 99.40%
+  Val   - Loss: 0.6122 | Cls: 0.5667 | Alloc: 0.0910 | Acc: 83.33%
+  Temperature: 0.59
+  Avg Allocations:
+    clean          : RGB 7.1 | Depth 4.9
+    depth_occluded : RGB 7.8 | Depth 4.2
+    low_light      : RGB 3.3 | Depth 8.7
+============================================================
+
+Epoch 83/100:
+  Train - Loss: 0.4496 | Cls: 0.0077 | Alloc: 0.0884 | Acc: 100.00%
+  Val   - Loss: 0.8271 | Cls: 0.7736 | Alloc: 0.1069 | Acc: 83.33%
+  Temperature: 0.58
+  Avg Allocations:
+    clean          : RGB 7.7 | Depth 4.3
+    depth_occluded : RGB 7.9 | Depth 4.1
+    low_light      : RGB 3.5 | Depth 8.5
+============================================================
+
+Epoch 84/100:
+  Train - Loss: 0.6740 | Cls: 0.0895 | Alloc: 0.1169 | Acc: 95.24%
+  Val   - Loss: 0.6483 | Cls: 0.5912 | Alloc: 0.1142 | Acc: 88.89%
+  Temperature: 0.58
+  Avg Allocations:
+    clean          : RGB 7.8 | Depth 4.2
+    depth_occluded : RGB 8.2 | Depth 3.8
+    low_light      : RGB 4.3 | Depth 7.7
+============================================================
+
+Epoch 85/100:
+  Train - Loss: 0.7237 | Cls: 0.0768 | Alloc: 0.1294 | Acc: 97.02%
+  Val   - Loss: 1.3435 | Cls: 1.2598 | Alloc: 0.1674 | Acc: 75.00%
+  Temperature: 0.57
+  Avg Allocations:
+    clean          : RGB 7.2 | Depth 4.8
+    depth_occluded : RGB 7.7 | Depth 4.3
+    low_light      : RGB 5.2 | Depth 6.8
+============================================================
+
+Epoch 86/100:
+  Train - Loss: 0.6582 | Cls: 0.0600 | Alloc: 0.1196 | Acc: 97.62%
+  Val   - Loss: 1.2770 | Cls: 1.2210 | Alloc: 0.1122 | Acc: 77.78%
+  Temperature: 0.57
+  Avg Allocations:
+    clean          : RGB 7.4 | Depth 4.6
+    depth_occluded : RGB 7.8 | Depth 4.2
+    low_light      : RGB 4.0 | Depth 8.0
+============================================================
+
+Epoch 87/100:
+  Train - Loss: 0.6515 | Cls: 0.0666 | Alloc: 0.1170 | Acc: 97.62%
+  Val   - Loss: 0.9611 | Cls: 0.8880 | Alloc: 0.1462 | Acc: 75.00%
+  Temperature: 0.56
+  Avg Allocations:
+    clean          : RGB 7.2 | Depth 4.8
+    depth_occluded : RGB 7.7 | Depth 4.3
+    low_light      : RGB 4.7 | Depth 7.3
+============================================================
+
+Epoch 88/100:
+  Train - Loss: 0.6381 | Cls: 0.0734 | Alloc: 0.1129 | Acc: 98.21%
+  Val   - Loss: 0.7098 | Cls: 0.6480 | Alloc: 0.1236 | Acc: 88.89%
+  Temperature: 0.56
+  Avg Allocations:
+    clean          : RGB 7.8 | Depth 4.2
+    depth_occluded : RGB 7.7 | Depth 4.3
+    low_light      : RGB 4.0 | Depth 8.0
+============================================================
+
+Epoch 89/100:
+  Train - Loss: 0.6526 | Cls: 0.0784 | Alloc: 0.1148 | Acc: 98.21%
+  Val   - Loss: 0.4939 | Cls: 0.4263 | Alloc: 0.1351 | Acc: 86.11%
+  Temperature: 0.55
+  Avg Allocations:
+    clean          : RGB 7.0 | Depth 5.0
+    depth_occluded : RGB 7.3 | Depth 4.7
+    low_light      : RGB 3.8 | Depth 8.2
+============================================================
+
+Epoch 90/100:
+  Train - Loss: 0.6303 | Cls: 0.0921 | Alloc: 0.1076 | Acc: 98.21%
+  Val   - Loss: 0.3481 | Cls: 0.2908 | Alloc: 0.1146 | Acc: 94.44%
+  Temperature: 0.55
+  Avg Allocations:
+    clean          : RGB 7.1 | Depth 4.9
+    depth_occluded : RGB 7.8 | Depth 4.2
+    low_light      : RGB 3.9 | Depth 8.1
+============================================================
+
+Epoch 91/100:
+  Train - Loss: 0.5544 | Cls: 0.0476 | Alloc: 0.1014 | Acc: 98.21%
+  Val   - Loss: 1.0659 | Cls: 1.0111 | Alloc: 0.1097 | Acc: 80.56%
+  Temperature: 0.54
+  Avg Allocations:
+    clean          : RGB 7.4 | Depth 4.6
+    depth_occluded : RGB 8.0 | Depth 4.0
+    low_light      : RGB 3.9 | Depth 8.1
+============================================================
+
+Epoch 92/100:
+  Train - Loss: 0.8119 | Cls: 0.1741 | Alloc: 0.1276 | Acc: 96.43%
+  Val   - Loss: 1.3222 | Cls: 1.2591 | Alloc: 0.1260 | Acc: 69.44%
+  Temperature: 0.54
+  Avg Allocations:
+    clean          : RGB 6.6 | Depth 5.4
+    depth_occluded : RGB 7.8 | Depth 4.2
+    low_light      : RGB 4.4 | Depth 7.6
+============================================================
+
+Epoch 93/100:
+  Train - Loss: 0.5781 | Cls: 0.0627 | Alloc: 0.1031 | Acc: 98.21%
+  Val   - Loss: 0.9022 | Cls: 0.8493 | Alloc: 0.1059 | Acc: 80.56%
+  Temperature: 0.53
+  Avg Allocations:
+    clean          : RGB 7.2 | Depth 4.8
+    depth_occluded : RGB 8.1 | Depth 3.9
+    low_light      : RGB 4.1 | Depth 7.9
+============================================================
+
+Epoch 94/100:
+  Train - Loss: 0.6655 | Cls: 0.1083 | Alloc: 0.1114 | Acc: 97.02%
+  Val   - Loss: 0.6255 | Cls: 0.5656 | Alloc: 0.1198 | Acc: 86.11%
+  Temperature: 0.53
+  Avg Allocations:
+    clean          : RGB 7.5 | Depth 4.5
+    depth_occluded : RGB 7.6 | Depth 4.4
+    low_light      : RGB 4.1 | Depth 7.9
+============================================================
+
+Epoch 95/100:
+  Train - Loss: 0.6010 | Cls: 0.0644 | Alloc: 0.1073 | Acc: 97.62%
+  Val   - Loss: 0.5872 | Cls: 0.5501 | Alloc: 0.0743 | Acc: 86.11%
+  Temperature: 0.53
+  Avg Allocations:
+    clean          : RGB 7.2 | Depth 4.8
+    depth_occluded : RGB 8.6 | Depth 3.4
+    low_light      : RGB 3.2 | Depth 8.8
+============================================================
+
+Epoch 96/100:
+  Train - Loss: 0.4661 | Cls: 0.0371 | Alloc: 0.0858 | Acc: 98.81%
+  Val   - Loss: 0.9873 | Cls: 0.9498 | Alloc: 0.0750 | Acc: 77.78%
+  Temperature: 0.52
+  Avg Allocations:
+    clean          : RGB 6.4 | Depth 5.6
+    depth_occluded : RGB 8.2 | Depth 3.8
+    low_light      : RGB 3.0 | Depth 9.0
+============================================================
+
+Epoch 97/100:
+  Train - Loss: 0.4193 | Cls: 0.0126 | Alloc: 0.0813 | Acc: 100.00%
+  Val   - Loss: 0.9665 | Cls: 0.9172 | Alloc: 0.0986 | Acc: 83.33%
+  Temperature: 0.52
+  Avg Allocations:
+    clean          : RGB 7.5 | Depth 4.5
+    depth_occluded : RGB 7.8 | Depth 4.2
+    low_light      : RGB 2.8 | Depth 9.2
+============================================================
+
+Epoch 98/100:
+  Train - Loss: 0.4106 | Cls: 0.0039 | Alloc: 0.0813 | Acc: 100.00%
+  Val   - Loss: 0.7979 | Cls: 0.7591 | Alloc: 0.0774 | Acc: 86.11%
+  Temperature: 0.51
+  Avg Allocations:
+    clean          : RGB 7.3 | Depth 4.7
+    depth_occluded : RGB 8.8 | Depth 3.2
+    low_light      : RGB 3.4 | Depth 8.6
+============================================================
+
+Epoch 99/100:
+  Train - Loss: 0.5241 | Cls: 0.0425 | Alloc: 0.0963 | Acc: 99.40%
+  Val   - Loss: 0.5912 | Cls: 0.5440 | Alloc: 0.0944 | Acc: 91.67%
+  Temperature: 0.51
+  Avg Allocations:
+    clean          : RGB 6.5 | Depth 5.5
+    depth_occluded : RGB 7.8 | Depth 4.2
+    low_light      : RGB 2.7 | Depth 9.3
+============================================================
+
+Epoch 100/100:
+  Train - Loss: 0.4710 | Cls: 0.0035 | Alloc: 0.0935 | Acc: 100.00%
+  Val   - Loss: 0.4286 | Cls: 0.3914 | Alloc: 0.0743 | Acc: 88.89%
+  Temperature: 0.50
+  Avg Allocations:
+    clean          : RGB 7.8 | Depth 4.2
+    depth_occluded : RGB 8.5 | Depth 3.5
+    low_light      : RGB 2.8 | Depth 9.2
+============================================================
+
+============================================================
+Evaluating on test set...
+============================================================
+
+Test Results:
+  Loss: 0.4112 | Cls: 0.3372 | Alloc: 0.1479 | Acc: 88.89%
+  Allocations:
+    clean          : RGB 6.3 | Depth 5.7
+    depth_occluded : RGB 7.4 | Depth 4.6
+    low_light      : RGB 4.0 | Depth 8.0
+============================================================
+
+✅ Stage 2 training completed!
+Best validation accuracy: 97.22%
+Test accuracy: 88.89%
+Models saved to checkpoints/stage2_L12
