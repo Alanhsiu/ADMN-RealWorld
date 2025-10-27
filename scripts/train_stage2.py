@@ -34,13 +34,13 @@ def set_seed(seed):
 class CorruptedGestureDataset(Dataset):
     """
     Dataset with corruption labels
-    Loads from: Data/corrupted_raw_data/{clean, depth_occluded, low_light}
+    Loads from: data/{clean, depth_occluded, low_light}
     """
     
     def __init__(self, root_dir, rgb_transform=None, depth_transform=None):
         """
         Args:
-            root_dir: Path to Data/corrupted_raw_data/
+            root_dir: Path to data/ directory
         """
         self.root_dir = root_dir
         self.rgb_transform = rgb_transform
@@ -80,9 +80,13 @@ class CorruptedGestureDataset(Dataset):
                 if not os.path.exists(class_dir):
                     continue
                 
-                # Get all color images
+                # Get all color images and sort
                 color_files = sorted([f for f in os.listdir(class_dir) 
                                      if f.startswith('color_image_')])
+                
+                # Limit depth_occluded to first 20 samples per class
+                if corruption_type == 'depth_occluded':
+                    color_files = color_files[:20]
                 
                 for color_file in color_files:
                     sample_id = color_file.replace('color_image_', '').replace('.png', '')
@@ -132,7 +136,7 @@ class CorruptedGestureDataset(Dataset):
 
 
 def get_corrupted_dataloaders(data_dir, batch_size=16, num_workers=4):
-    """Create dataloaders for corrupted data"""
+    """Create dataloaders for corrupted data with train/val/test split"""
     
     dataset = CorruptedGestureDataset(
         root_dir=data_dir,
@@ -140,12 +144,14 @@ def get_corrupted_dataloaders(data_dir, batch_size=16, num_workers=4):
         depth_transform=depth_transform
     )
     
-    # Split into train/val (80/20)
-    train_size = int(0.8 * len(dataset))
-    val_size = len(dataset) - train_size
+    # Split into train/val/test (70/15/15)
+    total_size = len(dataset)
+    train_size = int(0.7 * total_size)
+    val_size = int(0.15 * total_size)
+    test_size = total_size - train_size - val_size
     
-    train_dataset, val_dataset = torch.utils.data.random_split(
-        dataset, [train_size, val_size],
+    train_dataset, val_dataset, test_dataset = torch.utils.data.random_split(
+        dataset, [train_size, val_size, test_size],
         generator=torch.Generator().manual_seed(42)
     )
     
@@ -159,7 +165,12 @@ def get_corrupted_dataloaders(data_dir, batch_size=16, num_workers=4):
         shuffle=False, num_workers=num_workers
     )
     
-    return train_loader, val_loader
+    test_loader = DataLoader(
+        test_dataset, batch_size=batch_size,
+        shuffle=False, num_workers=num_workers
+    )
+    
+    return train_loader, val_loader, test_loader
 
 
 def compute_allocation_loss(layer_allocation, corruption_labels):
@@ -368,7 +379,7 @@ def main(args):
     
     # Load data
     print(f"\nLoading corrupted data from {args.data_dir}...")
-    train_loader, val_loader = get_corrupted_dataloaders(
+    train_loader, val_loader, test_loader = get_corrupted_dataloaders(
         data_dir=args.data_dir,
         batch_size=args.batch_size,
         num_workers=args.num_workers
@@ -376,6 +387,7 @@ def main(args):
     
     print(f"Train samples: {len(train_loader.dataset)}")
     print(f"Val samples: {len(val_loader.dataset)}")
+    print(f"Test samples: {len(test_loader.dataset)}")
     
     # Create model
     print("\nCreating adaptive model...")
@@ -405,7 +417,7 @@ def main(args):
     print("="*60)
     
     for epoch in range(1, args.epochs + 1):
-        # Anneal temperature
+        # Anneal temperature (start from 1.0, decrease to 0.5)
         temperature = max(0.5, 1.0 - (epoch / args.epochs) * 0.5)
         
         # Train
@@ -419,7 +431,7 @@ def main(args):
             model, val_loader, criterion, device, temperature
         )
         
-        # Log
+        # Log to tensorboard
         writer.add_scalar('Loss/train', train_loss, epoch)
         writer.add_scalar('Loss/val', val_loss, epoch)
         writer.add_scalar('Loss/train_cls', train_cls, epoch)
@@ -428,7 +440,7 @@ def main(args):
         writer.add_scalar('Accuracy/val', val_acc, epoch)
         writer.add_scalar('Temperature', temperature, epoch)
         
-        # Print
+        # Print epoch summary
         print(f"\nEpoch {epoch}/{args.epochs}:")
         print(f"  Train - Loss: {train_loss:.4f} | Cls: {train_cls:.4f} | Alloc: {train_alloc:.4f} | Acc: {train_acc:.2f}%")
         print(f"  Val   - Loss: {val_loss:.4f} | Cls: {val_cls:.4f} | Alloc: {val_alloc:.4f} | Acc: {val_acc:.2f}%")
@@ -439,7 +451,7 @@ def main(args):
         for corr_type, alloc in allocations.items():
             print(f"    {corr_type:15s}: RGB {alloc['rgb']:.1f} | Depth {alloc['depth']:.1f}")
         
-        # Save best
+        # Save best model
         if val_acc > best_val_acc:
             best_val_acc = val_acc
             checkpoint_path = os.path.join(args.output_dir, f'best_controller_{args.total_layers}layers.pth')
@@ -454,8 +466,34 @@ def main(args):
         
         print("="*60)
     
+    # Final test evaluation
+    print("\n" + "="*60)
+    print("Evaluating on test set...")
+    print("="*60)
+    
+    # Load best model
+    best_checkpoint = torch.load(
+        os.path.join(args.output_dir, f'best_controller_{args.total_layers}layers.pth'),
+        map_location=device
+    )
+    model.load_state_dict(best_checkpoint['model_state_dict'])
+    
+    # Test evaluation
+    test_loss, test_cls, test_alloc, test_acc, test_allocations = validate(
+        model, test_loader, criterion, device, temperature=0.5
+    )
+    
+    print(f"\nTest Results:")
+    print(f"  Loss: {test_loss:.4f} | Cls: {test_cls:.4f} | Alloc: {test_alloc:.4f} | Acc: {test_acc:.2f}%")
+    print(f"  Allocations:")
+    for corr_type, alloc in test_allocations.items():
+        print(f"    {corr_type:15s}: RGB {alloc['rgb']:.1f} | Depth {alloc['depth']:.1f}")
+    
+    print("="*60)
+    
     print(f"\n✅ Stage 2 training completed!")
     print(f"Best validation accuracy: {best_val_acc:.2f}%")
+    print(f"Test accuracy: {test_acc:.2f}%")
     print(f"Models saved to {args.output_dir}")
     
     writer.close()
@@ -465,23 +503,29 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Train Stage 2 Adaptive Controller')
     
     parser.add_argument('--data_dir', type=str, 
-                        default='Data/corrupted_raw_data',
-                        help='Path to corrupted data')
+                        default='data',
+                        help='Path to corrupted data directory')
     parser.add_argument('--stage1_checkpoint', type=str,
                         default='checkpoints/stage1/best_model.pth',
                         help='Path to Stage 1 checkpoint')
-    parser.add_argument('--batch_size', type=int, default=16)
-    parser.add_argument('--num_workers', type=int, default=4)
-    parser.add_argument('--epochs', type=int, default=50)
-    parser.add_argument('--lr', type=float, default=1e-3)
+    parser.add_argument('--batch_size', type=int, default=16,
+                        help='Batch size for training')
+    parser.add_argument('--num_workers', type=int, default=4,
+                        help='Number of data loading workers')
+    parser.add_argument('--epochs', type=int, default=50,
+                        help='Number of training epochs')
+    parser.add_argument('--lr', type=float, default=1e-3,
+                        help='Learning rate')
     parser.add_argument('--total_layers', type=int, default=8,
-                        help='Total layer budget')
+                        help='Total layer budget for controller')
     parser.add_argument('--alpha', type=float, default=1.0,
                         help='Weight for classification loss')
     parser.add_argument('--beta', type=float, default=0.5,
                         help='Weight for allocation loss')
-    parser.add_argument('--seed', type=int, default=42)
-    parser.add_argument('--output_dir', type=str, default='checkpoints/stage2')
+    parser.add_argument('--seed', type=int, default=42,
+                        help='Random seed for reproducibility')
+    parser.add_argument('--output_dir', type=str, default='checkpoints/stage2',
+                        help='Output directory for checkpoints')
     
     args = parser.parse_args()
     main(args)

@@ -229,6 +229,33 @@ class AdaptiveGestureClassifier(nn.Module):
         if stage1_checkpoint:
             self._load_stage1_weights(stage1_checkpoint)
     
+    # def _load_stage1_weights(self, checkpoint_path):
+    #     """Load Stage 1 weights and freeze backbone/fusion/classifier"""
+    #     print(f"Loading Stage 1 weights from {checkpoint_path}")
+        
+    #     checkpoint = torch.load(checkpoint_path, map_location='cpu', weights_only=False)
+        
+    #     # Load weights (will ignore controller-related weights)
+    #     msg = self.load_state_dict(checkpoint['model_state_dict'], strict=False)
+    #     print(f"Loaded Stage 1 weights: {msg}")
+        
+    #     # Freeze all Stage 1 components
+    #     for param in self.vision.parameters():
+    #         param.requires_grad = False
+    #     for param in self.depth.parameters():
+    #         param.requires_grad = False
+    #     for param in self.vision_adapter.parameters():
+    #         param.requires_grad = False
+    #     for param in self.depth_adapter.parameters():
+    #         param.requires_grad = False
+    #     for param in self.encoder.parameters():
+    #         param.requires_grad = False
+    #     for param in self.classifier.parameters():
+    #         param.requires_grad = False
+        
+    #     print("✅ Stage 1 components frozen")
+    #     print(f"Trainable params: {sum(p.numel() for p in self.parameters() if p.requires_grad):,}")
+    
     def _load_stage1_weights(self, checkpoint_path):
         """Load Stage 1 weights and freeze backbone/fusion/classifier"""
         print(f"Loading Stage 1 weights from {checkpoint_path}")
@@ -239,22 +266,53 @@ class AdaptiveGestureClassifier(nn.Module):
         msg = self.load_state_dict(checkpoint['model_state_dict'], strict=False)
         print(f"Loaded Stage 1 weights: {msg}")
         
-        # Freeze all Stage 1 components
-        for param in self.vision.parameters():
+        # Freeze early layers, unfreeze last 4 layers
+        print("\nFreezing strategy:")
+        
+        # RGB backbone: freeze first 8 layers, unfreeze last 4
+        for i, block in enumerate(self.vision.blocks):
+            if i < 8:  # Freeze layers 0-7
+                for param in block.parameters():
+                    param.requires_grad = False
+            else:  # Unfreeze layers 8-11
+                for param in block.parameters():
+                    param.requires_grad = True
+        
+        # Depth backbone: same strategy
+        for i, block in enumerate(self.depth.blocks):
+            if i < 8:
+                for param in block.parameters():
+                    param.requires_grad = False
+            else:
+                for param in block.parameters():
+                    param.requires_grad = True
+        
+        # Freeze patch embeddings
+        for param in self.vision.patch_embed.parameters():
             param.requires_grad = False
-        for param in self.depth.parameters():
-            param.requires_grad = False
-        for param in self.vision_adapter.parameters():
-            param.requires_grad = False
-        for param in self.depth_adapter.parameters():
-            param.requires_grad = False
-        for param in self.encoder.parameters():
-            param.requires_grad = False
-        for param in self.classifier.parameters():
+        for param in self.depth.patch_embed.parameters():
             param.requires_grad = False
         
-        print("✅ Stage 1 components frozen")
-        print(f"Trainable params: {sum(p.numel() for p in self.parameters() if p.requires_grad):,}")
+        # Unfreeze adapters (they need to adapt)
+        for param in self.vision_adapter.parameters():
+            param.requires_grad = True
+        for param in self.depth_adapter.parameters():
+            param.requires_grad = True
+        
+        # Unfreeze fusion encoder
+        for param in self.encoder.parameters():
+            param.requires_grad = True
+        
+        # Unfreeze classifier
+        for param in self.classifier.parameters():
+            param.requires_grad = True
+        
+        frozen_params = sum(p.numel() for p in self.parameters() if not p.requires_grad)
+        trainable_params = sum(p.numel() for p in self.parameters() if p.requires_grad)
+        
+        print(f"✅ Partial fine-tuning enabled")
+        print(f"  Frozen params: {frozen_params:,}")
+        print(f"  Trainable params: {trainable_params:,}")
     
     def forward(self, rgb, depth, temperature=1.0, return_allocation=False):
         """
