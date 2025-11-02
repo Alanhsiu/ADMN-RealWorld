@@ -7,7 +7,7 @@ import torch
 import torch.nn as nn
 import sys
 import os
-
+import time
 # Add GTDM path to import their modules
 sys.path.append(os.path.join(os.path.dirname(__file__), '../GTDM_Lowlight'))
 
@@ -149,6 +149,7 @@ class GestureClassifier(nn.Module):
             dropped_layers_depth = torch.ones(12).int().to(depth.device)
         
         # Extract RGB features
+        t0 = time.time()
         rgb_features = self.vision.forward_train(rgb, dropped_layers_img)
         rgb_features = torch.squeeze(rgb_features)
         if len(rgb_features.shape) == 1:
@@ -156,12 +157,14 @@ class GestureClassifier(nn.Module):
         outlist.append(self.vision_adapter(rgb_features))
         
         # Extract Depth features
+        t1 = time.time()
         depth_features = self.depth.forward_train(depth, dropped_layers_depth)
         depth_features = torch.squeeze(depth_features)
         if len(depth_features.shape) == 1:
             depth_features = torch.unsqueeze(depth_features, dim=0)
         outlist.append(self.depth_adapter(depth_features))
         
+        t2 = time.time()
         # Stack features: [batch_size, 2, dim]
         agg_features = torch.stack(outlist, dim=1)
         
@@ -177,8 +180,8 @@ class GestureClassifier(nn.Module):
         
         # Classification (CHANGED: from localization to classification)
         logits = self.classifier(fused)  # [batch_size, num_classes]
-        
-        return logits
+        t3 = time.time()
+        return logits, t1-t0, t2-t1, t3-t2
 
 
 # Test the model
