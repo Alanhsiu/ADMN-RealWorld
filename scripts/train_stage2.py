@@ -85,8 +85,8 @@ class CorruptedGestureDataset(Dataset):
                                      if f.startswith('color_image_')])
                 
                 # Limit depth_occluded to first 20 samples per class
-                if corruption_type == 'depth_occluded':
-                    color_files = color_files[:20]
+                # if corruption_type == 'depth_occluded':
+                #     color_files = color_files[:20]
                 
                 for color_file in color_files:
                     sample_id = color_file.replace('color_image_', '').replace('.png', '')
@@ -308,9 +308,19 @@ def train_epoch(model, dataloader, criterion, optimizer, device, epoch,
     return avg_loss, avg_cls_loss, avg_alloc_loss, accuracy
 
 
-def validate(model, dataloader, criterion, device, temperature=1.0):
-    """Validate the model"""
+def validate(model, dataloader, criterion, device, temperature=1.0, alpha=1.0, beta=0.5):
+    """Validate the model
+    
+    MODIFIED: Added alpha and beta parameters to match training
+    """
     model.eval()
+    
+    def set_eval_recursive(module):
+        module.eval()
+        for child in module.children():
+            set_eval_recursive(child)
+    
+    set_eval_recursive(model)
     
     total_loss = 0
     total_cls_loss = 0
@@ -340,7 +350,9 @@ def validate(model, dataloader, criterion, device, temperature=1.0):
             
             cls_loss = criterion(logits, labels)
             alloc_loss = compute_allocation_loss(layer_allocation, corruption)
-            loss = cls_loss + 0.5 * alloc_loss
+            
+            # MODIFIED: Use same alpha and beta as training
+            loss = alpha * cls_loss + beta * alloc_loss
             
             _, predicted = torch.max(logits, 1)
             total += labels.size(0)
@@ -381,7 +393,6 @@ def validate(model, dataloader, criterion, device, temperature=1.0):
             }
     
     return avg_loss, avg_cls_loss, avg_alloc_loss, accuracy, avg_allocations
-
 
 def main(args):
     set_seed(args.seed)
@@ -443,7 +454,8 @@ def main(args):
         
         # Validate
         val_loss, val_cls, val_alloc, val_acc, allocations = validate(
-            model, val_loader, criterion, device, temperature
+            model, val_loader, criterion, device, temperature,
+            alpha=args.alpha, beta=args.beta
         )
         
         # Log to tensorboard
@@ -495,7 +507,8 @@ def main(args):
     
     # Test evaluation
     test_loss, test_cls, test_alloc, test_acc, test_allocations = validate(
-        model, test_loader, criterion, device, temperature=0.5
+        model, test_loader, criterion, device, temperature=0.5,
+        alpha=args.alpha, beta=args.beta
     )
     
     print(f"\nTest Results:")
