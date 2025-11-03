@@ -67,8 +67,7 @@ class QoIPerceptionModule(nn.Module):
             rgb: [batch, 3, 224, 224]
             depth: [batch, 3, 224, 224]
         Returns:
-            rgb_qoi: [batch, output_dim]
-            depth_qoi: [batch, output_dim]
+            qoi_features: [batch, output_dim * 2] - concatenated RGB and Depth QoI
         """
         # Extract QoI features
         rgb_feat = self.rgb_conv(rgb)  # [batch, 128, 1, 1]
@@ -79,7 +78,10 @@ class QoIPerceptionModule(nn.Module):
         depth_feat = depth_feat.squeeze(-1).squeeze(-1)
         depth_qoi = self.depth_proj(depth_feat)
         
-        return rgb_qoi, depth_qoi
+        # Concatenate for fusion
+        qoi_features = torch.cat([rgb_qoi, depth_qoi], dim=-1)  # [batch, output_dim * 2]
+        
+        return qoi_features
 
 
 class LayerAllocationModule(nn.Module):
@@ -87,152 +89,80 @@ class LayerAllocationModule(nn.Module):
     Allocate layers based on QoI features
     Uses Gumbel-Softmax for differentiable discrete sampling
     """
-    def __init__(self, qoi_dim=128, total_layers=8):
+    def __init__(self, qoi_dim=128, hidden_dim=256, total_layers=8):
         super(LayerAllocationModule, self).__init__()
         
         self.total_layers = total_layers
         
-        # Fusion transformer to combine QoI info
-        self.fusion = TransformerEnc(
-            dim=qoi_dim, 
-            depth=2,  # Lightweight fusion
-            heads=4, 
-            dim_head=qoi_dim//4, 
-            mlp_dim=qoi_dim*2
+        # MLP to predict layer allocation logits
+        # Input: qoi_dim * 2 (RGB QoI + Depth QoI)
+        # Output: 24 (12 RGB layers + 12 Depth layers)
+        self.allocation_net = nn.Sequential(
+            nn.Linear(qoi_dim * 2, hidden_dim),
+            nn.ReLU(),
+            nn.Linear(hidden_dim, hidden_dim),
+            nn.ReLU(),
+            nn.Linear(hidden_dim, 24)  # 12 RGB + 12 Depth
         )
-        
-        # Output layer allocation logits
-        # 24 = 12 (RGB layers) + 12 (Depth layers)
-        self.layer_mlp = nn.Linear(qoi_dim, 24)
-    
-    # def forward(self, rgb_qoi, depth_qoi, temperature=1.0):
-    #     """
-    #     Args:
-    #         rgb_qoi: [batch, qoi_dim]
-    #         depth_qoi: [batch, qoi_dim]
-    #         temperature: Gumbel-Softmax temperature
-        
-    #     Returns:
-    #         layer_allocation: [batch, 2, 12] - binary allocation (0 or 1)
-    #         raw_logits: [batch, 24] - for loss calculation
-    #     """
-    #     batch_size = rgb_qoi.size(0)
-        
-    #     # Stack QoI features: [batch, 2, qoi_dim]
-    #     qoi_features = torch.stack([rgb_qoi, depth_qoi], dim=1)
-        
-    #     # Add positional encoding
-    #     _, n, d = qoi_features.shape
-    #     qoi_features = qoi_features + positionalencoding1d(d, n)
-        
-    #     # Fuse QoI information
-    #     fused = self.fusion(qoi_features)  # [batch, 2, qoi_dim]
-    #     fused = torch.mean(fused, dim=1)  # [batch, qoi_dim]
-        
-    #     # Get layer allocation logits
-    #     raw_logits = self.layer_mlp(fused)  # [batch, 24]
-        
-    #     # Gumbel-Softmax sampling with top-L selection
-    #     # Apply Gumbel-Softmax to get soft allocation
-    #     gumbel_noise = -torch.log(-torch.log(torch.rand_like(raw_logits) + 1e-10) + 1e-10)
-    #     logits_with_noise = (raw_logits + gumbel_noise) / temperature
-    #     soft_allocation = F.softmax(logits_with_noise, dim=-1)
-        
-    #     # Top-L selection (select top `total_layers` from 24 layers)
-    #     _, top_indices = torch.topk(soft_allocation, self.total_layers, dim=-1)
-        
-    #     # Create hard allocation (straight-through estimator)
-    #     hard_allocation = torch.zeros_like(soft_allocation)
-    #     hard_allocation.scatter_(1, top_indices, 1.0)
-        
-    #     # Straight-through: forward uses hard, backward uses soft
-    #     allocation = hard_allocation - soft_allocation.detach() + soft_allocation
-        
-    #     # Reshape to [batch, 2, 12] (RGB: first 12, Depth: last 12)
-    #     layer_allocation = torch.zeros(batch_size, 2, 12).to(allocation.device)
-    #     layer_allocation[:, 0, :] = allocation[:, :12]   # RGB layers
-    #     layer_allocation[:, 1, :] = allocation[:, 12:]   # Depth layers
-        
-    #     return layer_allocation, raw_logits
 
-    def forward(self, rgb_qoi, depth_qoi, temperature=1.0):
+    def forward(self, qoi_features, temperature=1.0):
         """
         Args:
-            rgb_qoi: [batch, qoi_dim]
-            depth_qoi: [batch, qoi_dim]
-            temperature: Gumbel-Softmax temperature
+            qoi_features: [batch, qoi_dim * 2]
+            temperature: Temperature for Gumbel-Softmax
         
         Returns:
-            layer_allocation: [batch, 2, 12] - binary allocation (0 or 1)
-            raw_logits: [batch, 24] - for loss calculation
+            allocation: [batch, 2, 12] - binary allocation (0 or 1)
         """
-        batch_size = rgb_qoi.size(0)
-        device = rgb_qoi.device  # ⭐ Get device from input
+        batch_size = qoi_features.size(0)
         
-        # Stack QoI features: [batch, 2, qoi_dim]
-        qoi_features = torch.stack([rgb_qoi, depth_qoi], dim=1)
+        # Predict logits for all 24 layers (12 RGB + 12 Depth)
+        logits = self.allocation_net(qoi_features)  # [batch, 24]
+        logits = logits.view(batch_size, 2, 12)    # [batch, 2, 12]
         
-        # Add positional encoding
-        _, n, d = qoi_features.shape
-        qoi_features = qoi_features + positionalencoding1d(d, n)
+        # Reserve first layers (always activated)
+        allocation_full = torch.zeros_like(logits)
+        allocation_full[:, 0, 0] = 1.0  # RGB first layer
+        allocation_full[:, 1, 0] = 1.0  # Depth first layer
         
-        # Fuse QoI information
-        fused = self.fusion(qoi_features)  # [batch, 2, qoi_dim]
-        fused = torch.mean(fused, dim=1)  # [batch, qoi_dim]
-        
-        # Get layer allocation logits
-        raw_logits = self.layer_mlp(fused)  # [batch, 24]
-        
-        # ⭐ CRITICAL: Always activate first layer of each backbone
-        # Reserve 2 layers (1 RGB + 1 Depth) for first layers
+        # Select from remaining layers
         remaining_budget = self.total_layers - 2
         
-        # Create mask for selectable layers (all except first layers)
-        # RGB layers: 0-11, Depth layers: 12-23
-        # First layers: 0 (RGB), 12 (Depth)
+        # Get selectable logits (exclude first layers)
         selectable_indices = []
         for i in range(24):
-            if i != 0 and i != 12:  # Skip first layers
+            if i != 0 and i != 12:  # Skip first layer of each modality
                 selectable_indices.append(i)
         
-        selectable_indices = torch.tensor(selectable_indices, device=device)  # [22]
+        logits_flat = logits.view(batch_size, -1)
+        selectable_logits = logits_flat[:, selectable_indices]  # [batch, 22]
         
-        # Extract logits for selectable layers
-        selectable_logits = raw_logits[:, selectable_indices]  # [batch, 22]
-        
-        # Gumbel-Softmax sampling on selectable layers
+        # Apply Gumbel-Softmax (with noise in both training and eval)
         gumbel_noise = -torch.log(-torch.log(torch.rand_like(selectable_logits) + 1e-10) + 1e-10)
         logits_with_noise = (selectable_logits + gumbel_noise) / temperature
-        soft_allocation_selectable = F.softmax(logits_with_noise, dim=-1)
+        soft_allocation = F.softmax(logits_with_noise, dim=-1)
         
-        # Top-(L-2) selection from 22 selectable layers
-        _, top_indices = torch.topk(soft_allocation_selectable, remaining_budget, dim=-1)
+        # Top-k selection (greedy)
+        _, top_k_indices = torch.topk(soft_allocation, k=remaining_budget, dim=-1)
         
-        # Create hard allocation for selectable layers
-        hard_allocation_selectable = torch.zeros_like(soft_allocation_selectable)
-        hard_allocation_selectable.scatter_(1, top_indices, 1.0)
+        # Create binary allocation (hard)
+        allocation_binary_hard = torch.zeros_like(selectable_logits)
+        allocation_binary_hard.scatter_(1, top_k_indices, 1.0)
         
-        # Straight-through estimator for selectable layers
-        allocation_selectable = (hard_allocation_selectable - 
-                            soft_allocation_selectable.detach() + 
-                            soft_allocation_selectable)
+        # MODIFIED: Straight-Through Estimator
+        # Forward pass: use hard (binary 0/1)
+        # Backward pass: use soft (differentiable)
+        allocation_binary = allocation_binary_hard - soft_allocation.detach() + soft_allocation
         
-        # Reconstruct full allocation [batch, 24]
-        allocation_full = torch.zeros(batch_size, 24, device=device)
-        allocation_full[:, 0] = 1.0   # RGB first layer always 1
-        allocation_full[:, 12] = 1.0  # Depth first layer always 1
+        # Map back to full allocation
+        for batch_idx in range(batch_size):
+            for sel_idx, full_idx in enumerate(selectable_indices):
+                modality = full_idx // 12
+                layer = full_idx % 12
+                allocation_full[batch_idx, modality, layer] = allocation_binary[batch_idx, sel_idx]
         
-        # Fill in selected layers
-        for i, idx in enumerate(selectable_indices):
-            allocation_full[:, idx] = allocation_selectable[:, i]
-        
-        # Reshape to [batch, 2, 12] (RGB: first 12, Depth: last 12)
-        layer_allocation = torch.zeros(batch_size, 2, 12, device=device)
-        layer_allocation[:, 0, :] = allocation_full[:, :12]   # RGB layers
-        layer_allocation[:, 1, :] = allocation_full[:, 12:]   # Depth layers
-        
-        return layer_allocation, raw_logits
-    
+        return allocation_full
+
 class AdaptiveGestureClassifier(nn.Module):
     """
     Stage 2: Gesture Classifier with Adaptive Controller
@@ -265,12 +195,13 @@ class AdaptiveGestureClassifier(nn.Module):
         # Layer Allocation Module (Trainable)
         # ========================================
         self.layer_allocator = LayerAllocationModule(
-            qoi_dim=qoi_dim, 
+            qoi_dim=qoi_dim,
+            hidden_dim=256,
             total_layers=total_layers
         )
         
         # ========================================
-        # Backbones (Frozen from Stage 1)
+        # Backbones (From Stage 1)
         # ========================================
         self.vision = VisionTransformer(
             patch_size=16, embed_dim=768, depth=12, 
@@ -285,7 +216,7 @@ class AdaptiveGestureClassifier(nn.Module):
         )
         
         # ========================================
-        # Adapters, Fusion, Classifier (Frozen from Stage 1)
+        # Adapters, Fusion, Classifier (From Stage 1)
         # ========================================
         self.vision_adapter = Adapter(768, adapter_hidden_dim)
         self.depth_adapter = Adapter(768, adapter_hidden_dim)
@@ -302,10 +233,9 @@ class AdaptiveGestureClassifier(nn.Module):
             nn.Linear(128, num_classes)
         )
         
-        # Load and freeze Stage 1 weights
+        # Load Stage 1 weights if provided
         if stage1_checkpoint:
             self._load_stage1_weights(stage1_checkpoint)
-    
     
     def _load_stage1_weights(self, checkpoint_path):
         """Load Stage 1 weights and freeze backbone/fusion/classifier"""
@@ -344,7 +274,7 @@ class AdaptiveGestureClassifier(nn.Module):
         for param in self.depth.patch_embed.parameters():
             param.requires_grad = False
         
-        # Unfreeze adapters (they need to adapt)
+        # Unfreeze adapters
         for param in self.vision_adapter.parameters():
             param.requires_grad = True
         for param in self.depth_adapter.parameters():
@@ -382,14 +312,12 @@ class AdaptiveGestureClassifier(nn.Module):
         # ========================================
         # Step 1: Perceive QoI
         # ========================================
-        rgb_qoi, depth_qoi = self.qoi_perception(rgb, depth)
+        qoi_features = self.qoi_perception(rgb, depth)  # [batch, qoi_dim * 2]
         
         # ========================================
         # Step 2: Allocate Layers
         # ========================================
-        layer_allocation, raw_logits = self.layer_allocator(
-            rgb_qoi, depth_qoi, temperature
-        )  # [batch, 2, 12]
+        layer_allocation = self.layer_allocator(qoi_features, temperature)  # [batch, 2, 12]
         
         # ========================================
         # Step 3: Execute Backbones with Selected Layers
