@@ -105,6 +105,56 @@ class LayerAllocationModule(nn.Module):
         # 24 = 12 (RGB layers) + 12 (Depth layers)
         self.layer_mlp = nn.Linear(qoi_dim, 24)
     
+    # def forward(self, rgb_qoi, depth_qoi, temperature=1.0):
+    #     """
+    #     Args:
+    #         rgb_qoi: [batch, qoi_dim]
+    #         depth_qoi: [batch, qoi_dim]
+    #         temperature: Gumbel-Softmax temperature
+        
+    #     Returns:
+    #         layer_allocation: [batch, 2, 12] - binary allocation (0 or 1)
+    #         raw_logits: [batch, 24] - for loss calculation
+    #     """
+    #     batch_size = rgb_qoi.size(0)
+        
+    #     # Stack QoI features: [batch, 2, qoi_dim]
+    #     qoi_features = torch.stack([rgb_qoi, depth_qoi], dim=1)
+        
+    #     # Add positional encoding
+    #     _, n, d = qoi_features.shape
+    #     qoi_features = qoi_features + positionalencoding1d(d, n)
+        
+    #     # Fuse QoI information
+    #     fused = self.fusion(qoi_features)  # [batch, 2, qoi_dim]
+    #     fused = torch.mean(fused, dim=1)  # [batch, qoi_dim]
+        
+    #     # Get layer allocation logits
+    #     raw_logits = self.layer_mlp(fused)  # [batch, 24]
+        
+    #     # Gumbel-Softmax sampling with top-L selection
+    #     # Apply Gumbel-Softmax to get soft allocation
+    #     gumbel_noise = -torch.log(-torch.log(torch.rand_like(raw_logits) + 1e-10) + 1e-10)
+    #     logits_with_noise = (raw_logits + gumbel_noise) / temperature
+    #     soft_allocation = F.softmax(logits_with_noise, dim=-1)
+        
+    #     # Top-L selection (select top `total_layers` from 24 layers)
+    #     _, top_indices = torch.topk(soft_allocation, self.total_layers, dim=-1)
+        
+    #     # Create hard allocation (straight-through estimator)
+    #     hard_allocation = torch.zeros_like(soft_allocation)
+    #     hard_allocation.scatter_(1, top_indices, 1.0)
+        
+    #     # Straight-through: forward uses hard, backward uses soft
+    #     allocation = hard_allocation - soft_allocation.detach() + soft_allocation
+        
+    #     # Reshape to [batch, 2, 12] (RGB: first 12, Depth: last 12)
+    #     layer_allocation = torch.zeros(batch_size, 2, 12).to(allocation.device)
+    #     layer_allocation[:, 0, :] = allocation[:, :12]   # RGB layers
+    #     layer_allocation[:, 1, :] = allocation[:, 12:]   # Depth layers
+        
+    #     return layer_allocation, raw_logits
+
     def forward(self, rgb_qoi, depth_qoi, temperature=1.0):
         """
         Args:
@@ -117,6 +167,7 @@ class LayerAllocationModule(nn.Module):
             raw_logits: [batch, 24] - for loss calculation
         """
         batch_size = rgb_qoi.size(0)
+        device = rgb_qoi.device  # ⭐ Get device from input
         
         # Stack QoI features: [batch, 2, qoi_dim]
         qoi_features = torch.stack([rgb_qoi, depth_qoi], dim=1)
@@ -132,30 +183,56 @@ class LayerAllocationModule(nn.Module):
         # Get layer allocation logits
         raw_logits = self.layer_mlp(fused)  # [batch, 24]
         
-        # Gumbel-Softmax sampling with top-L selection
-        # Apply Gumbel-Softmax to get soft allocation
-        gumbel_noise = -torch.log(-torch.log(torch.rand_like(raw_logits) + 1e-10) + 1e-10)
-        logits_with_noise = (raw_logits + gumbel_noise) / temperature
-        soft_allocation = F.softmax(logits_with_noise, dim=-1)
+        # ⭐ CRITICAL: Always activate first layer of each backbone
+        # Reserve 2 layers (1 RGB + 1 Depth) for first layers
+        remaining_budget = self.total_layers - 2
         
-        # Top-L selection (select top `total_layers` from 24 layers)
-        _, top_indices = torch.topk(soft_allocation, self.total_layers, dim=-1)
+        # Create mask for selectable layers (all except first layers)
+        # RGB layers: 0-11, Depth layers: 12-23
+        # First layers: 0 (RGB), 12 (Depth)
+        selectable_indices = []
+        for i in range(24):
+            if i != 0 and i != 12:  # Skip first layers
+                selectable_indices.append(i)
         
-        # Create hard allocation (straight-through estimator)
-        hard_allocation = torch.zeros_like(soft_allocation)
-        hard_allocation.scatter_(1, top_indices, 1.0)
+        selectable_indices = torch.tensor(selectable_indices, device=device)  # [22]
         
-        # Straight-through: forward uses hard, backward uses soft
-        allocation = hard_allocation - soft_allocation.detach() + soft_allocation
+        # Extract logits for selectable layers
+        selectable_logits = raw_logits[:, selectable_indices]  # [batch, 22]
+        
+        # Gumbel-Softmax sampling on selectable layers
+        gumbel_noise = -torch.log(-torch.log(torch.rand_like(selectable_logits) + 1e-10) + 1e-10)
+        logits_with_noise = (selectable_logits + gumbel_noise) / temperature
+        soft_allocation_selectable = F.softmax(logits_with_noise, dim=-1)
+        
+        # Top-(L-2) selection from 22 selectable layers
+        _, top_indices = torch.topk(soft_allocation_selectable, remaining_budget, dim=-1)
+        
+        # Create hard allocation for selectable layers
+        hard_allocation_selectable = torch.zeros_like(soft_allocation_selectable)
+        hard_allocation_selectable.scatter_(1, top_indices, 1.0)
+        
+        # Straight-through estimator for selectable layers
+        allocation_selectable = (hard_allocation_selectable - 
+                            soft_allocation_selectable.detach() + 
+                            soft_allocation_selectable)
+        
+        # Reconstruct full allocation [batch, 24]
+        allocation_full = torch.zeros(batch_size, 24, device=device)
+        allocation_full[:, 0] = 1.0   # RGB first layer always 1
+        allocation_full[:, 12] = 1.0  # Depth first layer always 1
+        
+        # Fill in selected layers
+        for i, idx in enumerate(selectable_indices):
+            allocation_full[:, idx] = allocation_selectable[:, i]
         
         # Reshape to [batch, 2, 12] (RGB: first 12, Depth: last 12)
-        layer_allocation = torch.zeros(batch_size, 2, 12).to(allocation.device)
-        layer_allocation[:, 0, :] = allocation[:, :12]   # RGB layers
-        layer_allocation[:, 1, :] = allocation[:, 12:]   # Depth layers
+        layer_allocation = torch.zeros(batch_size, 2, 12, device=device)
+        layer_allocation[:, 0, :] = allocation_full[:, :12]   # RGB layers
+        layer_allocation[:, 1, :] = allocation_full[:, 12:]   # Depth layers
         
         return layer_allocation, raw_logits
-
-
+    
 class AdaptiveGestureClassifier(nn.Module):
     """
     Stage 2: Gesture Classifier with Adaptive Controller
@@ -229,32 +306,6 @@ class AdaptiveGestureClassifier(nn.Module):
         if stage1_checkpoint:
             self._load_stage1_weights(stage1_checkpoint)
     
-    # def _load_stage1_weights(self, checkpoint_path):
-    #     """Load Stage 1 weights and freeze backbone/fusion/classifier"""
-    #     print(f"Loading Stage 1 weights from {checkpoint_path}")
-        
-    #     checkpoint = torch.load(checkpoint_path, map_location='cpu', weights_only=False)
-        
-    #     # Load weights (will ignore controller-related weights)
-    #     msg = self.load_state_dict(checkpoint['model_state_dict'], strict=False)
-    #     print(f"Loaded Stage 1 weights: {msg}")
-        
-    #     # Freeze all Stage 1 components
-    #     for param in self.vision.parameters():
-    #         param.requires_grad = False
-    #     for param in self.depth.parameters():
-    #         param.requires_grad = False
-    #     for param in self.vision_adapter.parameters():
-    #         param.requires_grad = False
-    #     for param in self.depth_adapter.parameters():
-    #         param.requires_grad = False
-    #     for param in self.encoder.parameters():
-    #         param.requires_grad = False
-    #     for param in self.classifier.parameters():
-    #         param.requires_grad = False
-        
-    #     print("✅ Stage 1 components frozen")
-    #     print(f"Trainable params: {sum(p.numel() for p in self.parameters() if p.requires_grad):,}")
     
     def _load_stage1_weights(self, checkpoint_path):
         """Load Stage 1 weights and freeze backbone/fusion/classifier"""

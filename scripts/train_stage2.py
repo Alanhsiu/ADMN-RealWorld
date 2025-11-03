@@ -135,42 +135,56 @@ class CorruptedGestureDataset(Dataset):
         return data, label, corruption
 
 
-def get_corrupted_dataloaders(data_dir, batch_size=16, num_workers=4):
-    """Create dataloaders for corrupted data with train/val/test split"""
-    
+def get_corrupted_dataloaders(data_dir, batch_size=16, num_workers=0, seed=42):
+    """
+    Create dataloaders for corrupted gesture dataset
+    MODIFIED: Use 80/20 split (same as Stage 1) instead of 70/15/15
+    """
+    # Create dataset
     dataset = CorruptedGestureDataset(
         root_dir=data_dir,
         rgb_transform=rgb_transform,
         depth_transform=depth_transform
     )
     
-    # Split into train/val/test (70/15/15)
-    total_size = len(dataset)
-    train_size = int(0.7 * total_size)
-    val_size = int(0.15 * total_size)
-    test_size = total_size - train_size - val_size
+    print(f"Loading corrupted dataset from {data_dir}...")
+    print(f"Loaded {len(dataset)} samples")
     
-    train_dataset, val_dataset, test_dataset = torch.utils.data.random_split(
-        dataset, [train_size, val_size, test_size],
-        generator=torch.Generator().manual_seed(42)
+    # MODIFIED: 80/20 split (same as Stage 1 for consistency)
+    total_size = len(dataset)
+    train_size = int(0.8 * total_size)  # 192 samples
+    val_size = total_size - train_size  # 48 samples
+    
+    # MODIFIED: Only 2-way split (no separate test set)
+    train_dataset, val_dataset = torch.utils.data.random_split(
+        dataset, 
+        [train_size, val_size],
+        generator=torch.Generator().manual_seed(seed)
     )
     
+    print(f"Split (80/20, matching Stage 1):")
+    print(f"  Train: {train_size} samples")
+    print(f"  Val:   {val_size} samples (used as test)")
+    
+    # Create dataloaders
     train_loader = DataLoader(
-        train_dataset, batch_size=batch_size, 
-        shuffle=True, num_workers=num_workers
+        train_dataset,
+        batch_size=batch_size,
+        shuffle=True,
+        num_workers=num_workers,
+        pin_memory=True
     )
     
     val_loader = DataLoader(
-        val_dataset, batch_size=batch_size,
-        shuffle=False, num_workers=num_workers
+        val_dataset,
+        batch_size=batch_size,
+        shuffle=False,
+        num_workers=num_workers,
+        pin_memory=True
     )
     
-    test_loader = DataLoader(
-        test_dataset, batch_size=batch_size,
-        shuffle=False, num_workers=num_workers
-    )
-    
-    return train_loader, val_loader, test_loader
+    # MODIFIED: Return val_loader twice (serves as both val and test)
+    return train_loader, val_loader, val_loader
 
 
 def compute_allocation_loss(layer_allocation, corruption_labels):
@@ -382,7 +396,8 @@ def main(args):
     train_loader, val_loader, test_loader = get_corrupted_dataloaders(
         data_dir=args.data_dir,
         batch_size=args.batch_size,
-        num_workers=args.num_workers
+        num_workers=args.num_workers,
+        seed=args.seed
     )
     
     print(f"Train samples: {len(train_loader.dataset)}")
