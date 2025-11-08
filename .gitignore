@@ -9,6 +9,8 @@ GTDM_Lowlight/**/*.pyc
 
 data/__pycache__/
 scripts/best_model.pth
+rpi/best_model.pth
 models/__pycache__/
+**/.DS_Store
 
 scripts/__pycache__/
