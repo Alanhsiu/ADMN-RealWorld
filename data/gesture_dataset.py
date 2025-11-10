@@ -128,6 +128,20 @@ class GestureRGBDDataset(Dataset):
         
         return data, sample['label']
 
+def single_image_transform(rgb_image_path, depth_image_path):
+    """Transform a single RGB-D image pair for inference"""
+    rgb_img = Image.open(rgb_image_path).convert('RGB')
+    depth_img = Image.open(depth_image_path).convert('L')
+    
+    rgb = rgb_transform(rgb_img)
+    depth = depth_transform(depth_img)
+    
+    data = {
+        'rgb': rgb.unsqueeze(0),  # Add batch dimension
+        'depth': depth.unsqueeze(0),
+    }
+    
+    return data
 
 def get_dataloaders(data_dir='data/processed', batch_size=32, num_workers=4):
     """
