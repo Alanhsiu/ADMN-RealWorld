@@ -143,6 +143,24 @@ def single_image_transform(rgb_image_path, depth_image_path):
     
     return data
 
+def transform_from_camera(rgb_np, depth_np):
+    # Transform RGB-D numpy arrays from camera to model input
+    rgb_np = rgb_np[:, :, [2, 1, 0]]
+    depth_np = depth_np[:, :, [2, 1, 0]]
+     
+    rgb_img = Image.fromarray(rgb_np.astype(np.uint8)).convert('RGB')
+    depth_img = Image.fromarray(depth_np.astype(np.uint8)).convert('L')
+
+    rgb = rgb_transform(rgb_img)
+    depth = depth_transform(depth_img)
+    
+    data = {
+        'rgb': rgb.unsqueeze(0), 
+        'depth': depth.unsqueeze(0),
+    }
+    
+    return data
+
 def get_dataloaders(data_dir='data/processed', batch_size=32, num_workers=4):
     """
     Create train/val/test dataloaders
